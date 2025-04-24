@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+:root {
+  --background-start: #A78BFA;
+  --background-end: #7C3AED;
+  --foreground: #4B1C00;
+  --secondary-text: #6B7280;
+}
+
+body {
+  background: linear-gradient(180deg, var(--background-start), var(--background-end));
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

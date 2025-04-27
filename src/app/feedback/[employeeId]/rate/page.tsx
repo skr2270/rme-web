@@ -5,18 +5,14 @@ import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/atoms/Button';
 import { RatingStars } from '@/components/molecules/RatingStars';
-
-const dummyEmployees: Record<string, { name: string; jobTitle: string; imageUrl: string }> = {
-  '1': { name: 'Rahul', jobTitle: 'Manager', imageUrl: '/placeholder1.jpg' },
-  '2': { name: 'Arjun', jobTitle: 'Team Leader', imageUrl: '/placeholder2.jpg' },
-  '3': { name: 'Manoj', jobTitle: 'Sales', imageUrl: '/placeholder3.jpg' },
-};
+import { dummyEmployeeList } from '@/app/data/dummyEmployees';
 
 export default function RatePage() {
   const router = useRouter();
   const params = useParams();
   const employeeId = params.employeeId as string;
-  const employee = dummyEmployees[employeeId];
+
+  const employee = dummyEmployeeList.find(emp => emp.id === employeeId);
 
   const [rating, setRating] = useState<number | null>(null);
 

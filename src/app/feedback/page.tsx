@@ -6,14 +6,9 @@ import { Header } from '@/components/organisms/Header';
 import { CategoryFilter } from '@/components/molecules/CategoryFilter';
 import { EmployeeList } from '@/components/organisms/EmployeeList';
 import { Button } from '@/components/atoms/Button';
+import { dummyEmployeeList } from '@/app/data/dummyEmployees';
 
 const categories = ["Managers", "Staff", "Executives", "Cooks", "Cashier"];
-
-const dummyEmployees = [
-  { id: '1', name: 'Rahul', jobTitle: 'Manager', imageUrl: '/placeholder1.jpg' },
-  { id: '2', name: 'Arjun', jobTitle: 'Team Leader', imageUrl: '/placeholder2.jpg' },
-  { id: '3', name: 'Manoj', jobTitle: 'Sales', imageUrl: '/placeholder3.jpg' },
-];
 
 export default function FeedbackPage() {
   const router = useRouter();
@@ -23,7 +18,9 @@ export default function FeedbackPage() {
     router.push(`/feedback/${id}/rate`);
   };
 
-  const employees = selectedCategory ? dummyEmployees.filter(emp => emp.jobTitle === selectedCategory) : dummyEmployees;
+  const employees = selectedCategory
+    ? dummyEmployeeList.filter(emp => emp.jobTitle === selectedCategory)
+    : dummyEmployeeList;
 
   return (
     <div className="min-h-screen p-4">

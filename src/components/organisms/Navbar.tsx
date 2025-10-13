@@ -17,10 +17,10 @@ export default function Navbar() {
   }, []);
 
   const navItems = [
-    { href: "#features", label: "Features" },
-    { href: "#how-it-works", label: "How it works" },
-    { href: "#benefits", label: "Benefits" },
-    { href: "#industries", label: "Industries" }
+    { href: "/#features", label: "Features" },
+    { href: "/#how-it-works", label: "How it works" },
+    { href: "/#benefits", label: "Benefits" },
+    { href: "/#industries", label: "Industries" }
   ];
 
   return (
@@ -44,14 +44,14 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8 xl:gap-10">
             {navItems.map((item) => (
-              <a 
+              <Link 
                 key={item.href}
                 href={item.href} 
                 className="text-gray-700 hover:text-violet-600 font-medium transition-all hover:scale-105 text-sm xl:text-base relative group"
               >
                 {item.label}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-violet-600 transition-all group-hover:w-full"></span>
-              </a>
+              </Link>
             ))}
             <div className="flex items-center gap-3 xl:gap-4">
               <Link 
@@ -92,14 +92,14 @@ export default function Navbar() {
           <div className="lg:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-white/95 backdrop-blur-xl rounded-lg mt-2 shadow-lg border border-gray-100">
               {navItems.map((item) => (
-                <a
+                <Link
                   key={item.href}
                   href={item.href}
                   className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-violet-600 hover:bg-violet-50 rounded-md transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {item.label}
-                </a>
+                </Link>
               ))}
               <div className="px-3 py-2 space-y-2">
                 <Link

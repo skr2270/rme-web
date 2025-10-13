@@ -11,7 +11,9 @@ export default function ReviewPage() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const employeeId = params.employeeId as string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const rating = searchParams.get('rating');
 
   const [review, setReview] = useState('');

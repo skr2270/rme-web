@@ -61,7 +61,7 @@ export default function Home() {
                 href="/feedback" 
                 className="group relative inline-flex items-center justify-center gap-2 sm:gap-3 bg-gradient-to-r from-violet-600 to-violet-700 text-white px-8 sm:px-10 lg:px-12 py-4 sm:py-5 lg:py-6 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-bold shadow-2xl shadow-violet-500/30 hover:shadow-violet-500/50 transition-all hover:scale-105"
               >
-                <span className="relative z-10">Start rating employees</span>
+                <span className="relative z-10">Provide employee feedback</span>
                 <svg className="w-6 h-6 sm:w-7 sm:h-7 group-hover:translate-x-1 transition-transform relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>

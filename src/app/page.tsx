@@ -69,7 +69,7 @@ export default function Home() {
                    alt="RME" 
                    width={80} 
                    height={40} 
-                   className="inline-block ml-3 sm:ml-4 h-8 sm:h-10 w-auto" 
+                   className="inline-block ml-3 sm:ml-4 h-[0.78em] sm:h-[0.84em] lg:h-[0.82em] w-auto align-baseline" 
                  />
                  <svg className="absolute -bottom-1 sm:-bottom-2 left-0 w-full hidden sm:block" height="12" viewBox="0 0 300 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                    <path d="M2 10C50 5 100 2 150 3C200 4 250 7 298 10" stroke="url(#gradient)" strokeWidth="3" strokeLinecap="round"/>

@@ -297,11 +297,10 @@ export default function Chatbot() {
         
         {/* Text Label */}
         <motion.div
-          className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900/90 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full border border-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap"
-          initial={{ opacity: 0, y: 5 }}
-          whileHover={{ opacity: 1, y: 0 }}
+          className="absolute top-1/2 right-full -translate-y-1/2 mr-3 rounded-full border border-violet-200 bg-white text-gray-900 text-xs px-3 py-1 shadow-md whitespace-nowrap select-none pointer-events-none opacity-95 group-hover:opacity-100 transition-opacity"
         >
-          Ask about RME
+          Chat here
+          <span className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-r border-b border-violet-200 rotate-45 shadow-sm"></span>
         </motion.div>
       </motion.div>
 

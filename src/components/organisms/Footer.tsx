@@ -62,7 +62,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-gradient-to-b from-gray-50 to-white border-t border-gray-200">
+    <footer className="bg-transparent border-t border-amber-100/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
         <div className="py-12 sm:py-16 lg:py-20">
@@ -78,7 +78,7 @@ export default function Footer() {
                   className="h-10 lg:h-12 w-auto transition-transform group-hover:scale-105" 
                 />
               </Link>
-              <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-6 max-w-sm">
+              <p className="text-espresso-soft text-sm sm:text-base leading-relaxed mb-6 max-w-sm">
                 Transform your workforce with real-time feedback. The only platform combining employee ratings, performance analytics, and smart recruitment.
               </p>
               <div className="flex space-x-4">
@@ -86,7 +86,7 @@ export default function Footer() {
                   <a
                     key={social.name}
                     href={social.href}
-                    className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-violet-100 flex items-center justify-center text-gray-600 hover:text-violet-600 transition-all hover:scale-110"
+                    className="w-10 h-10 rounded-lg bg-beige-card hover:bg-white/70 flex items-center justify-center text-espresso-soft hover:text-violet-600 transition-all hover:scale-110 border border-amber-100/60"
                     aria-label={social.name}
                   >
                     {social.icon}
@@ -97,13 +97,13 @@ export default function Footer() {
 
             {/* Product Links */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Product</h3>
+              <h3 className="text-sm font-semibold text-espresso uppercase tracking-wider mb-4">Product</h3>
               <ul className="space-y-3">
                 {footerLinks.product.map((link) => (
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-sm text-gray-600 hover:text-violet-600 transition-colors"
+                      className="text-sm text-espresso-soft hover:text-violet-600 transition-colors"
                     >
                       {link.label}
                     </a>
@@ -114,13 +114,13 @@ export default function Footer() {
 
             {/* Company Links */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Company</h3>
+              <h3 className="text-sm font-semibold text-espresso uppercase tracking-wider mb-4">Company</h3>
               <ul className="space-y-3">
                 {footerLinks.company.map((link) => (
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-sm text-gray-600 hover:text-violet-600 transition-colors"
+                      className="text-sm text-espresso-soft hover:text-violet-600 transition-colors"
                     >
                       {link.label}
                     </a>
@@ -131,13 +131,13 @@ export default function Footer() {
 
             {/* Support Links */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Support</h3>
+              <h3 className="text-sm font-semibold text-espresso uppercase tracking-wider mb-4">Support</h3>
               <ul className="space-y-3">
                 {footerLinks.support.map((link) => (
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-sm text-gray-600 hover:text-violet-600 transition-colors"
+                      className="text-sm text-espresso-soft hover:text-violet-600 transition-colors"
                     >
                       {link.label}
                     </a>
@@ -148,13 +148,13 @@ export default function Footer() {
 
             {/* Legal Links */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Legal</h3>
+              <h3 className="text-sm font-semibold text-espresso uppercase tracking-wider mb-4">Legal</h3>
               <ul className="space-y-3">
                 {footerLinks.legal.map((link) => (
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-sm text-gray-600 hover:text-violet-600 transition-colors"
+                      className="text-sm text-espresso-soft hover:text-violet-600 transition-colors"
                     >
                       {link.label}
                     </a>
@@ -166,18 +166,18 @@ export default function Footer() {
         </div>
 
         {/* Newsletter Section */}
-        <div className="py-8 border-t border-gray-200">
+        <div className="py-8 border-t border-amber-100/60">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Stay updated</h3>
-              <p className="text-gray-600 text-sm">Get the latest updates on employee performance insights and platform features.</p>
+              <h3 className="text-lg font-semibold text-espresso mb-2">Stay updated</h3>
+              <p className="text-espresso-soft text-sm">Get the latest updates on employee performance insights and platform features.</p>
             </div>
             <div className="flex w-full md:w-auto">
               <div className="flex-1 md:flex-none">
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className="w-full md:w-80 px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm"
+                  className="w-full md:w-80 px-4 py-3 border border-amber-200 rounded-l-lg bg-beige-card focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm"
                 />
                 <button className="w-full md:w-auto bg-gradient-to-r from-violet-600 to-violet-700 text-white px-6 py-3 rounded-r-lg hover:from-violet-700 hover:to-violet-800 transition-all font-semibold text-sm">
                   Subscribe
@@ -188,16 +188,16 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="py-6 border-t border-gray-200">
+        <div className="py-6 border-t border-amber-100/60">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-espresso-soft">
               © {currentYear} Rate My Employee. All rights reserved.
             </p>
             <div className="flex items-center space-x-6">
-              <span className="text-sm text-gray-500">Made with ❤️ in India</span>
+              <span className="text-sm text-espresso-soft">Made with ❤️ in India</span>
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-gray-500">All systems operational</span>
+                <span className="text-sm text-espresso-soft">All systems operational</span>
               </div>
             </div>
           </div>

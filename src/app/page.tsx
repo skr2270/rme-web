@@ -124,7 +124,7 @@ export default function Home() {
       </section>
 
       {/* Powered By Section */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-beige-luxe-soft">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-transparent">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-xs sm:text-sm font-semibold text-gray-500 mb-6 sm:mb-8 tracking-widest uppercase">Trusted by forward-thinking businesses</p>
           <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12 opacity-60">
@@ -136,8 +136,7 @@ export default function Home() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 bg-beige-luxe-soft relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] sm:w-[1000px] h-[300px] sm:h-[400px] bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.06),transparent_60%)] blur-3xl -z-10"></div>
+      <section id="how-it-works" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 bg-transparent relative overflow-hidden">
         
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16 lg:mb-20">
@@ -231,7 +230,7 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section id="features" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 relative bg-beige-luxe-soft">
+      <section id="features" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 relative bg-transparent">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16 lg:mb-20">
             <div className="inline-block px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-espresso-glass border border-violet-200 text-violet-700 text-xs sm:text-sm font-bold mb-4 sm:mb-6 shadow-sm">
@@ -351,7 +350,7 @@ export default function Home() {
       </section>
 
       {/* Benefits / Value Proposition */}
-      <section id="benefits" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 bg-beige-luxe-soft relative overflow-hidden">
+      <section id="benefits" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 bg-transparent relative overflow-hidden">
         
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16 lg:mb-20">
@@ -449,7 +448,7 @@ export default function Home() {
       </section>
 
       {/* Industries */}
-      <section id="industries" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 bg-beige-luxe-soft">
+      <section id="industries" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 bg-transparent">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16 lg:mb-20">
             <div className="inline-block px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-gray-100 text-violet-700 text-xs sm:text-sm font-bold mb-4 sm:mb-6 shadow-sm">

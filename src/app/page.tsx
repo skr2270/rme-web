@@ -13,7 +13,7 @@ export default function Home() {
   const faqStructuredData = getFAQStructuredData();
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-beige-luxe">
       {/* Structured Data */}
       <script
         type="application/ld+json"
@@ -37,17 +37,17 @@ export default function Home() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative pt-24 sm:pt-28 lg:pt-32 xl:pt-40 pb-16 sm:pb-20 lg:pb-24 xl:pb-32 px-4 sm:px-6 overflow-hidden bg-gradient-to-b from-stone-50 to-stone-100">
+      <section className="relative pt-24 sm:pt-28 lg:pt-32 xl:pt-40 pb-16 sm:pb-20 lg:pb-24 xl:pb-32 px-4 sm:px-6 overflow-hidden">
         {/* Animated gradient background */}
         <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 right-0 w-[400px] sm:w-[600px] lg:w-[800px] h-[400px] sm:h-[600px] lg:h-[800px] bg-gradient-to-br from-stone-100/40 via-stone-100/30 to-stone-50/20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-[300px] sm:w-[500px] lg:w-[600px] h-[300px] sm:h-[500px] lg:h-[600px] bg-gradient-to-tr from-slate-100/40 via-gray-100/30 to-slate-50/20 rounded-full blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-[400px] sm:w-[600px] lg:w-[800px] h-[400px] sm:h-[600px] lg:h-[800px] rounded-full blur-3xl" style={{background:"radial-gradient(closest-side, rgba(234,210,170,0.35), transparent)"}}></div>
+          <div className="absolute bottom-0 left-0 w-[300px] sm:w-[500px] lg:w-[600px] h-[300px] sm:h-[500px] lg:h-[600px] rounded-full blur-3xl" style={{background:"radial-gradient(closest-side, rgba(43,32,25,0.10), transparent)"}}></div>
         </div>
 
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full bg-yellow-50 border border-yellow-200/50 text-violet-700 font-semibold text-xs sm:text-sm mb-6 sm:mb-8 shadow-sm hover:shadow-md transition-all hover:scale-105 cursor-default">
+            <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full bg-espresso-glass border border-amber-200/50 text-espresso font-semibold text-xs sm:text-sm mb-6 sm:mb-8 shadow-sm hover:shadow-md transition-all hover:scale-105 cursor-default">
               <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-yellow-500"></span>
@@ -57,7 +57,7 @@ export default function Home() {
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-extrabold text-gray-900 mb-6 sm:mb-8 leading-[1.1] tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-extrabold text-espresso mb-6 sm:mb-8 leading-[1.1] tracking-tight">
               <span className="block">Stop Losing Customers</span>
               <span className="block">To Bad Service With</span>
                <span className="relative inline-block mt-2 sm:mt-4">
@@ -69,8 +69,8 @@ export default function Home() {
                    <path d="M2 10C50 5 100 2 150 3C200 4 250 7 298 10" stroke="url(#gradient)" strokeWidth="3" strokeLinecap="round"/>
                    <defs>
                      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                       <stop offset="0%" stopColor="#9333ea"/>
-                       <stop offset="100%" stopColor="#7c3aed"/>
+                      <stop offset="0%" stopColor="#7c3aed"/>
+                      <stop offset="100%" stopColor="#6d28d9"/>
                      </linearGradient>
                    </defs>
                  </svg>
@@ -78,7 +78,7 @@ export default function Home() {
             </h1>
 
             {/* Subheadline */}
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-8 sm:mb-12 max-w-3xl lg:max-w-4xl mx-auto leading-relaxed px-4 sm:px-0">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-espresso-soft mb-8 sm:mb-12 max-w-3xl lg:max-w-4xl mx-auto leading-relaxed px-4 sm:px-0">
               The only platform combining employee ratings, performance analytics, and smart recruitment for better service quality. 
               <span className="font-semibold text-violet-600 block sm:inline mt-1 sm:mt-0"> Set up in under 10 minutes.</span>
             </p>
@@ -98,7 +98,7 @@ export default function Home() {
             </div>
 
             {/* Trust Badge */}
-            <p className="text-xs sm:text-sm text-gray-500 mb-4">No setup fees. Cancel anytime.</p>
+            <p className="text-xs sm:text-sm text-espresso-soft/80 mb-4">No setup fees. Cancel anytime.</p>
           </div>
 
           {/* Animated Stats Grid */}
@@ -110,12 +110,12 @@ export default function Home() {
               { value: "48%", label: "Report poor CX", color: "from-violet-700 to-violet-600" }
             ].map((stat, idx) => (
               <div key={idx} className="group relative">
-                <div className={`absolute -inset-0.5 bg-gradient-to-r ${stat.color} rounded-xl sm:rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-500`}></div>
-                <div className="relative bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-100 hover:border-transparent transition-all shadow-lg hover:shadow-2xl hover:-translate-y-1 sm:hover:-translate-y-2">
+                <div className={`absolute -inset-0.5 bg-gradient-to-r ${stat.color} rounded-xl sm:rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500`}></div>
+                <div className="relative bg-beige-card rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-amber-100/40 hover:border-violet-200/40 transition-all shadow-lg hover:shadow-2xl hover:-translate-y-1 sm:hover:-translate-y-2">
                   <div className={`text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-2 sm:mb-3`}>
                     {stat.value}
                   </div>
-                  <div className="text-xs sm:text-sm font-medium text-gray-600 leading-tight">{stat.label}</div>
+                  <div className="text-xs sm:text-sm font-medium text-espresso-soft leading-tight">{stat.label}</div>
                 </div>
               </div>
             ))}
@@ -124,7 +124,7 @@ export default function Home() {
       </section>
 
       {/* Powered By Section */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-b from-white to-gray-50/30">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-beige-luxe-soft">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-xs sm:text-sm font-semibold text-gray-500 mb-6 sm:mb-8 tracking-widest uppercase">Trusted by forward-thinking businesses</p>
           <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12 opacity-60">
@@ -136,12 +136,12 @@ export default function Home() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 bg-gradient-to-b from-gray-50/30 to-white relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] sm:w-[1000px] h-[300px] sm:h-[400px] bg-gradient-to-b from-gray-100/20 to-transparent blur-3xl -z-10"></div>
+      <section id="how-it-works" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 bg-beige-luxe-soft relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] sm:w-[1000px] h-[300px] sm:h-[400px] bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.06),transparent_60%)] blur-3xl -z-10"></div>
         
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16 lg:mb-20">
-            <div className="inline-block px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-gray-100 text-violet-700 text-xs sm:text-sm font-bold mb-4 sm:mb-6 shadow-sm">
+            <div className="inline-block px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-espresso-glass border border-violet-200 text-violet-700 text-xs sm:text-sm font-bold mb-4 sm:mb-6 shadow-sm">
               HOW IT WORKS
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-4 sm:mb-6">
@@ -195,7 +195,7 @@ export default function Home() {
               }
             ].map((item, idx) => (
               <div key={idx} className="group relative">
-                <div className="bg-white border border-gray-200 rounded-2xl p-8 hover:border-violet-300 transition-all shadow-sm hover:shadow-lg hover:-translate-y-1">
+                <div className="bg-beige-card border border-amber-100/40 rounded-2xl p-8 hover:border-violet-200/60 transition-all shadow-sm hover:shadow-lg hover:-translate-y-1">
                   <div className="flex items-start justify-between mb-6">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-4">
@@ -204,11 +204,11 @@ export default function Home() {
                         </div>
                         <h3 className="text-xl font-bold text-gray-900">{item.title}</h3>
                       </div>
-                      <p className="text-gray-600 leading-relaxed mb-6">{item.description}</p>
+                      <p className="text-espresso-soft leading-relaxed mb-6">{item.description}</p>
                       
                       <div className="space-y-3">
                         {item.features.map((feature, fidx) => (
-                          <div key={fidx} className="flex items-center gap-3 text-sm text-gray-600">
+                            <div key={fidx} className="flex items-center gap-3 text-sm text-espresso-soft">
                             <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
                               <svg className="w-3 h-3 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -231,10 +231,10 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section id="features" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 relative">
+      <section id="features" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 relative bg-beige-luxe-soft">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16 lg:mb-20">
-            <div className="inline-block px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-gray-100 text-violet-700 text-xs sm:text-sm font-bold mb-4 sm:mb-6 shadow-sm">
+            <div className="inline-block px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-espresso-glass border border-violet-200 text-violet-700 text-xs sm:text-sm font-bold mb-4 sm:mb-6 shadow-sm">
               FEATURES
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-4 sm:mb-6">
@@ -318,7 +318,7 @@ export default function Home() {
               }
             ].map((feature, idx) => (
               <div key={idx} className="group relative">
-                <div className="bg-white border border-gray-200 rounded-2xl p-8 hover:border-violet-300 transition-all shadow-sm hover:shadow-lg hover:-translate-y-1">
+                <div className="bg-beige-card border border-amber-100/40 rounded-2xl p-8 hover:border-violet-200/60 transition-all shadow-sm hover:shadow-lg hover:-translate-y-1">
                   <div className="flex items-start justify-between mb-6">
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
@@ -326,12 +326,12 @@ export default function Home() {
                         <div className="text-3xl font-bold text-violet-600 mb-4">{feature.value}</div>
                       )}
                       {feature.description && (
-                        <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                        <p className="text-espresso-soft leading-relaxed">{feature.description}</p>
                       )}
                       {feature.integrations && (
                         <div className="mt-4 space-y-2">
                           {feature.integrations.map((integration, iidx) => (
-                            <div key={iidx} className="flex items-center gap-2 text-sm text-gray-600">
+                            <div key={iidx} className="flex items-center gap-2 text-sm text-espresso-soft">
                               <span className="text-violet-600 font-semibold">{integration.icon}</span>
                               <span>{integration.name}</span>
                             </div>
@@ -351,11 +351,11 @@ export default function Home() {
       </section>
 
       {/* Benefits / Value Proposition */}
-      <section id="benefits" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 bg-white relative overflow-hidden">
+      <section id="benefits" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 bg-beige-luxe-soft relative overflow-hidden">
         
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16 lg:mb-20">
-            <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-yellow-50 border border-yellow-200 text-violet-700 text-xs sm:text-sm font-bold mb-4 sm:mb-6 shadow-sm">
+            <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-espresso-glass border border-violet-200 text-violet-700 text-xs sm:text-sm font-bold mb-4 sm:mb-6 shadow-sm">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
@@ -418,7 +418,7 @@ export default function Home() {
               }
             ].map((category, idx) => (
               <div key={idx} className="group relative">
-                <div className="bg-white border border-gray-200 rounded-2xl p-8 hover:border-violet-300 transition-all shadow-sm hover:shadow-xl hover:-translate-y-1">
+                <div className="bg-beige-card border border-amber-100/40 rounded-2xl p-8 hover:border-violet-200/60 transition-all shadow-sm hover:shadow-xl hover:-translate-y-1">
                   <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 ${
                     category.color === 'violet' ? 'bg-violet-100 text-violet-600' : 'bg-yellow-100 text-yellow-600'
                   }`}>
@@ -437,7 +437,7 @@ export default function Home() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                           </svg>
                         </div>
-                        <span className="text-gray-700 leading-relaxed">{benefit.text}</span>
+                        <span className="text-espresso-soft leading-relaxed">{benefit.text}</span>
           </li>
                     ))}
                   </ul>
@@ -449,7 +449,7 @@ export default function Home() {
       </section>
 
       {/* Industries */}
-      <section id="industries" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6">
+      <section id="industries" className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 bg-beige-luxe-soft">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16 lg:mb-20">
             <div className="inline-block px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-gray-100 text-violet-700 text-xs sm:text-sm font-bold mb-4 sm:mb-6 shadow-sm">
@@ -476,10 +476,10 @@ export default function Home() {
             ].map((industry, idx) => (
               <div key={idx} className="group relative">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-500 to-violet-600 rounded-xl sm:rounded-2xl blur opacity-0 group-hover:opacity-25 transition duration-500"></div>
-                <div className="relative bg-white border border-gray-100 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 text-center hover:border-violet-300 transition-all shadow-lg hover:shadow-2xl hover:-translate-y-1 sm:hover:-translate-y-2">
+                <div className="relative bg-beige-card border border-amber-100/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 text-center hover:border-violet-200/60 transition-all shadow-lg hover:shadow-2xl hover:-translate-y-1 sm:hover:-translate-y-2">
                   <div className="text-3xl sm:text-4xl lg:text-5xl mb-3 sm:mb-4 group-hover:scale-125 transition-transform">{industry.emoji}</div>
-                  <h4 className="text-xs sm:text-sm font-bold text-gray-900 mb-1 sm:mb-2">{industry.name}</h4>
-                  <p className="text-xs text-gray-600">{industry.desc}</p>
+                  <h4 className="text-xs sm:text-sm font-bold text-espresso mb-1 sm:mb-2">{industry.name}</h4>
+                  <p className="text-xs text-espresso-soft">{industry.desc}</p>
                 </div>
               </div>
             ))}
@@ -488,23 +488,22 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 relative overflow-hidden bg-gradient-to-br from-stone-50 via-white to-stone-100">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(250,204,21,0.08),transparent_60%)]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(124,58,237,0.05),transparent_60%)]"></div>
+      <section className="py-16 sm:py-20 lg:py-24 xl:py-32 px-4 sm:px-6 relative overflow-hidden bg-beige-luxe-soft">
+        <div className="absolute inset-0 pointer-events-none"></div>
         
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-yellow-50 border border-yellow-200 text-violet-700 text-sm font-bold mb-8 shadow-sm">
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-espresso-glass border border-violet-200 text-espresso text-sm font-bold mb-8 shadow-sm">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
               </svg>
               TRANSFORM YOUR TEAM TODAY
             </div>
             
-            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 mb-6 sm:mb-8 leading-tight">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-espresso mb-6 sm:mb-8 leading-tight">
               Ready to transform <br className="hidden sm:block"/>your workforce?
             </h2>
-            <p className="text-lg sm:text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed px-4 sm:px-0">
+            <p className="text-lg sm:text-xl md:text-2xl text-espresso-soft mb-12 max-w-3xl mx-auto leading-relaxed px-4 sm:px-0">
               Join 500+ businesses already using Rate My Employee to drive performance and improve customer satisfaction.
             </p>
           </div>
@@ -559,22 +558,15 @@ export default function Home() {
                 
                 <div className="space-y-4">
                   <Link href="/signup" className="group w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-xl hover:shadow-2xl transition-all hover:scale-105">
-                    Sign Up
+                    Get Started Free
                     <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </Link>
-                  
-                  <Link href="/login" className="w-full inline-flex items-center justify-center gap-3 bg-gray-50 hover:bg-gray-100 text-gray-700 px-8 py-4 rounded-xl text-lg font-bold border-2 border-gray-200 hover:border-gray-300 transition-all hover:scale-105">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                    </svg>
-                    Login
-                  </Link>
                 </div>
                 
-                <div className="mt-6 pt-6 border-t border-gray-100">
-                  <p className="text-center text-sm text-gray-500">
+                <div className="mt-6 pt-6 border-t border-violet-200/60">
+                  <p className="text-center text-sm text-espresso-soft">
                     <span className="font-semibold text-violet-600">✓</span> Free 14-day trial
                     <span className="mx-2">•</span>
                     <span className="font-semibold text-violet-600">✓</span> No credit card required
@@ -583,8 +575,8 @@ export default function Home() {
               </div>
               
               {/* Decorative elements */}
-              <div className="absolute -top-4 -right-4 w-24 h-24 bg-yellow-400/20 rounded-full blur-xl"></div>
-              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-violet-400/20 rounded-full blur-xl"></div>
+              <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full blur-xl" style={{background:'rgba(124,58,237,0.15)'}}></div>
+              <div className="absolute -bottom-4 -left-4 w-32 h-32 rounded-full blur-xl" style={{background:'rgba(109,40,217,0.15)'}}></div>
             </div>
           </div>
         </div>

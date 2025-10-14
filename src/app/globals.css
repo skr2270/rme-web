@@ -16,6 +16,41 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Luxe beige theme utilities */
+.bg-beige-luxe {
+  background: radial-gradient(1200px 600px at 20% -10%, rgba(234, 210, 170, 0.35) 0%, rgba(234, 210, 170, 0.08) 40%, transparent 70%),
+              radial-gradient(900px 500px at 100% 20%, rgba(82, 59, 43, 0.10) 0%, transparent 60%),
+              linear-gradient(180deg, #f6f0e8 0%, #efe7db 50%, #e7dece 100%);
+}
+
+.bg-beige-luxe-soft {
+  background: radial-gradient(800px 400px at -10% 100%, rgba(234, 210, 170, 0.30) 0%, transparent 60%),
+              radial-gradient(800px 400px at 110% 0%, rgba(82, 59, 43, 0.08) 0%, transparent 55%),
+              linear-gradient(180deg, #faf6f0 0%, #f3ede4 60%, #ece3d7 100%);
+}
+
+/* Card surface matching beige theme */
+.bg-beige-card {
+  background: linear-gradient(180deg, #faf6f0 0%, #f3ede4 100%);
+}
+
+.text-espresso {
+  color: #2b2019;
+}
+
+.text-espresso-soft {
+  color: #4a3a2f;
+}
+
+.accent-coral {
+  color: #ff6b5c;
+}
+
+.bg-espresso-glass {
+  background: rgba(43, 32, 25, 0.06);
+  backdrop-filter: blur(10px);
+}
+
 /* Custom scrollbar with gradient */
 ::-webkit-scrollbar {
   width: 12px;

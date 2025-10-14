@@ -5,10 +5,10 @@ import { useState } from "react";
 import Navbar from "@/components/organisms/Navbar";
 import Footer from "@/components/organisms/Footer";
 
-type UserType = 'customer' | 'business' | 'employee';
+// Business portal only
+type UserType = 'business';
 
 export default function SignupPage() {
-  const [selectedUserType, setSelectedUserType] = useState<UserType>('business');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -19,8 +19,7 @@ export default function SignupPage() {
     phone: '',
     agreeToTerms: false
   });
-  const [otp, setOtp] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
+  // OTP flow removed for non-business
   const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,11 +42,7 @@ export default function SignupPage() {
     e.preventDefault();
     setIsLoading(true);
     
-    if (selectedUserType === 'business') {
-      console.log('Business Signup:', { ...formData });
-    } else {
-      console.log('Customer/Employee Signup:', { ...formData, otp });
-    }
+    console.log('Business Signup:', { ...formData });
     
     setTimeout(() => {
       setIsLoading(false);
@@ -58,7 +53,7 @@ export default function SignupPage() {
     <div className="min-h-screen bg-stone-50">
       <Navbar />
       
-      <div className="relative pt-20 sm:pt-24 pb-12 sm:pb-16 px-4 sm:px-6 overflow-hidden bg-gradient-to-b from-stone-50 to-stone-100">
+      <div className="relative pt-20 sm:pt-24 pb-12 sm:pb-16 px-4 sm:px-6 overflow-hidden bg-beige-luxe-soft">
         {/* Animated gradient background */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-0 right-0 w-[400px] sm:w-[600px] lg:w-[800px] h-[400px] sm:h-[600px] lg:h-[800px] bg-gradient-to-br from-stone-100/40 via-stone-100/30 to-stone-50/20 rounded-full blur-3xl"></div>
@@ -98,36 +93,15 @@ export default function SignupPage() {
 
             {/* Subheadline */}
             <p className="text-sm sm:text-base text-gray-600 mb-6 max-w-xl mx-auto leading-relaxed">
-              Start your journey to better service quality
+              Business portal sign-up. Customers and employees should use the app.
             </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-espresso-glass border border-violet-200 text-espresso">
+              <span className="text-xs">Not a business?</span>
+              <Link href="/#download" className="text-violet-700 font-semibold text-sm hover:underline">Get the App →</Link>
+            </div>
           </div>
 
-          {/* User Type Selection */}
-          <div className="mb-6 sm:mb-8">
-            <div className="inline-block px-3 py-1 rounded-full bg-gray-100 text-violet-700 text-xs font-bold mb-3 shadow-sm">
-              ACCOUNT TYPE
-            </div>
-            <div className="flex bg-white rounded-xl p-1 border border-gray-200 shadow-sm">
-              {[
-                { id: 'customer', label: 'Customer', icon: '👤' },
-                { id: 'business', label: 'Business', icon: '🏢' },
-                { id: 'employee', label: 'Employee', icon: '👥' }
-              ].map((type) => (
-                <button
-                  key={type.id}
-                  onClick={() => setSelectedUserType(type.id as UserType)}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg font-medium transition-all duration-300 ${
-                    selectedUserType === type.id
-                      ? 'bg-gradient-to-r from-violet-600 to-violet-700 text-white shadow-lg'
-                      : 'text-gray-600 hover:text-violet-600 hover:bg-violet-50'
-                  }`}
-                >
-                  <span className="text-base">{type.icon}</span>
-                  <span className="text-xs font-semibold">{type.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* Business-only Signup */}
 
           {/* Signup Form */}
           <div className="bg-white border border-gray-200 rounded-xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all">
@@ -163,9 +137,7 @@ export default function SignupPage() {
                 </div>
               </div>
 
-              {selectedUserType === 'business' ? (
-                // Business Signup
-                <>
+              {/* Business Signup */}
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-gray-700">
                       Business Email
@@ -247,81 +219,6 @@ export default function SignupPage() {
                       required
                     />
                   </div>
-                </>
-              ) : (
-                // Customer/Employee Signup
-                <>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">
-                      Phone Number
-                    </label>
-                    <div className="flex">
-                      <select className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border border-gray-200 rounded-l-xl border-r-0 focus:border-violet-500 text-gray-900 text-base sm:text-lg">
-                        <option>+91</option>
-                        <option>+1</option>
-                        <option>+44</option>
-                      </select>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className="flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border border-gray-200 rounded-r-xl focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all text-gray-900 text-base sm:text-lg placeholder-gray-500"
-                        placeholder="98765 43210"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {!otpSent ? (
-                    <button
-                      type="button"
-                      onClick={handleSendOtp}
-                      disabled={!formData.phone || isLoading}
-                      className="w-full bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white py-3 px-6 rounded-xl font-semibold text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-                    >
-                      {isLoading ? 'Sending OTP...' : 'Send OTP'}
-                    </button>
-                  ) : (
-                    <>
-                      <div className="space-y-3">
-                        <label className="block text-sm font-semibold text-gray-700">
-                          Enter OTP
-                        </label>
-                        <div className="flex justify-center space-x-2">
-                          {[0, 1, 2, 3, 4, 5].map((index) => (
-                            <input
-                              key={index}
-                              type="text"
-                              maxLength={1}
-                              value={otp[index] || ''}
-                              onChange={(e) => {
-                                const newOtp = otp.split('');
-                                newOtp[index] = e.target.value;
-                                setOtp(newOtp.join(''));
-                              }}
-                              className="w-10 h-10 text-center bg-gray-50 border border-gray-200 rounded-lg focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 text-gray-900 text-lg font-bold"
-                            />
-                          ))}
-                        </div>
-                        <p className="text-xs text-gray-500 text-center">
-                          OTP sent to +91 {formData.phone}
-                        </p>
-                      </div>
-
-                      <div className="text-center">
-                        <button
-                          type="button"
-                          onClick={() => setOtpSent(false)}
-                          className="text-xs text-violet-600 hover:text-violet-700 font-semibold"
-                        >
-                          Change phone number
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
 
               <div className="flex items-start">
                 <input
@@ -344,8 +241,7 @@ export default function SignupPage() {
                 </label>
               </div>
 
-              {/* Only show Create Account button for business signup or after OTP is sent */}
-              {(selectedUserType === 'business' || otpSent) && (
+              {/* Create Account */}
                 <button
                   type="submit"
                   disabled={isLoading}
@@ -353,7 +249,7 @@ export default function SignupPage() {
                 >
                   {isLoading ? 'Creating Account...' : 'Create Account'}
                 </button>
-              )}
+              
             </form>
 
             <div className="mt-6 text-center">

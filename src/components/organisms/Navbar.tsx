@@ -25,7 +25,7 @@ export default function Navbar() {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled ? 'bg-white/95 backdrop-blur-xl shadow-lg border-b border-gray-100' : 'bg-transparent'
+      scrolled ? 'bg-white/75 backdrop-blur-xl shadow-lg border-b border-violet-100/60' : 'bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
@@ -54,17 +54,25 @@ export default function Navbar() {
               </Link>
             ))}
             <div className="flex items-center gap-3 xl:gap-4">
+              {/* Get the App - glass pill */}
               <Link 
-                href="/login" 
-                className="text-gray-700 hover:text-violet-600 font-medium transition-all hover:scale-105 text-sm xl:text-base"
+                href="/#download" 
+                className="group relative inline-flex items-center gap-2 px-4 xl:px-5 py-2 xl:py-2.5 rounded-xl border border-violet-200/70 bg-white/40 backdrop-blur-md text-espresso hover:bg-white/60 hover:border-violet-300 shadow-sm"
               >
-                Login
+                <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2zm5 14h.01" />
+                </svg>
+                <span className="font-semibold text-sm xl:text-base">Get the App</span>
+                <svg className="w-4 h-4 text-violet-600 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                </svg>
               </Link>
+              {/* Contact Us - primary */}
               <Link 
-                href="/signup" 
-                className="relative group overflow-hidden bg-gradient-to-r from-violet-600 to-violet-700 text-white px-5 xl:px-7 py-2.5 xl:py-3 rounded-lg xl:rounded-xl font-semibold shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 transition-all text-sm xl:text-base"
+                href="/contact" 
+                className="relative group overflow-hidden bg-gradient-to-r from-violet-600 to-violet-700 text-white px-5 xl:px-7 py-2.5 xl:py-3 rounded-xl font-semibold shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 transition-all text-sm xl:text-base"
               >
-                <span className="relative z-10">Sign Up</span>
+                <span className="relative z-10">Contact Us</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-violet-700 to-violet-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </Link>
             </div>
@@ -90,7 +98,7 @@ export default function Navbar() {
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="lg:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-white/95 backdrop-blur-xl rounded-lg mt-2 shadow-lg border border-gray-100">
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-white/90 backdrop-blur-xl rounded-lg mt-2 shadow-lg border border-violet-100">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
@@ -103,18 +111,18 @@ export default function Navbar() {
               ))}
               <div className="px-3 py-2 space-y-2">
                 <Link
-                  href="/login"
-                  className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-violet-600 hover:bg-violet-50 rounded-md transition-colors"
+                  href="/#download"
+                  className="block w-full text-left px-3 py-2 text-base font-semibold text-espresso border border-violet-200 rounded-lg bg-white/60 hover:bg-white"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Login
+                  Get the App
                 </Link>
                 <Link
-                  href="/signup"
+                  href="/contact"
                   className="block w-full bg-gradient-to-r from-violet-600 to-violet-700 text-white px-4 py-2 rounded-lg font-semibold text-center shadow-lg"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Sign Up
+                  Contact Us
                 </Link>
               </div>
             </div>

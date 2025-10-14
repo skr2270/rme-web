@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import Image from "next/image";
+// import Image from "next/image";
 import Navbar from "@/components/organisms/Navbar";
 import Footer from "@/components/organisms/Footer";
 import Chatbot from "@/components/organisms/Chatbot";
@@ -64,13 +64,7 @@ export default function Home() {
                  <span className="bg-gradient-to-r from-violet-600 via-violet-700 to-violet-600 bg-clip-text text-transparent animate-gradient">
                    Real-Time Feedback
                  </span>
-                 <Image 
-                   src="/RME2.png" 
-                   alt="RME" 
-                   width={80} 
-                   height={40} 
-                   className="inline-block ml-3 sm:ml-4 h-[0.78em] sm:h-[0.84em] lg:h-[0.82em] w-auto align-baseline" 
-                 />
+                 
                  <svg className="absolute -bottom-1 sm:-bottom-2 left-0 w-full hidden sm:block" height="12" viewBox="0 0 300 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                    <path d="M2 10C50 5 100 2 150 3C200 4 250 7 298 10" stroke="url(#gradient)" strokeWidth="3" strokeLinecap="round"/>
                    <defs>

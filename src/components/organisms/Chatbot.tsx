@@ -299,7 +299,7 @@ export default function Chatbot() {
         <motion.div
           className="absolute top-1/2 right-full -translate-y-1/2 mr-3 rounded-full border border-violet-200 bg-white text-gray-900 text-xs px-3 py-1 shadow-md whitespace-nowrap select-none pointer-events-none opacity-95 group-hover:opacity-100 transition-opacity"
         >
-          Chat here
+          Ask me?
           <span className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-r border-b border-violet-200 rotate-45 shadow-sm"></span>
         </motion.div>
       </motion.div>

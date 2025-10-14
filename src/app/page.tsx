@@ -1,8 +1,10 @@
 'use client';
 
 import Link from "next/link";
+import Image from "next/image";
 import Navbar from "@/components/organisms/Navbar";
 import Footer from "@/components/organisms/Footer";
+import Chatbot from "@/components/organisms/Chatbot";
 import { getBusinessStructuredData, getOrganizationStructuredData, getFAQStructuredData } from "@/components/seo/StructuredData";
 
 export default function Home() {
@@ -58,20 +60,27 @@ export default function Home() {
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-extrabold text-gray-900 mb-6 sm:mb-8 leading-[1.1] tracking-tight">
               <span className="block">Stop Losing Customers</span>
               <span className="block">To Bad Service With</span>
-              <span className="relative inline-block mt-2 sm:mt-4">
-                <span className="bg-gradient-to-r from-violet-600 via-violet-700 to-violet-600 bg-clip-text text-transparent animate-gradient">
-                  Real-Time Feedback
-                </span>
-                <svg className="absolute -bottom-1 sm:-bottom-2 left-0 w-full hidden sm:block" height="12" viewBox="0 0 300 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2 10C50 5 100 2 150 3C200 4 250 7 298 10" stroke="url(#gradient)" strokeWidth="3" strokeLinecap="round"/>
-                  <defs>
-                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#9333ea"/>
-                      <stop offset="100%" stopColor="#7c3aed"/>
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </span>
+               <span className="relative inline-block mt-2 sm:mt-4">
+                 <span className="bg-gradient-to-r from-violet-600 via-violet-700 to-violet-600 bg-clip-text text-transparent animate-gradient">
+                   Real-Time Feedback
+                 </span>
+                 <Image 
+                   src="/RME2.png" 
+                   alt="RME" 
+                   width={80} 
+                   height={40} 
+                   className="inline-block ml-3 sm:ml-4 h-8 sm:h-10 w-auto" 
+                 />
+                 <svg className="absolute -bottom-1 sm:-bottom-2 left-0 w-full hidden sm:block" height="12" viewBox="0 0 300 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                   <path d="M2 10C50 5 100 2 150 3C200 4 250 7 298 10" stroke="url(#gradient)" strokeWidth="3" strokeLinecap="round"/>
+                   <defs>
+                     <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                       <stop offset="0%" stopColor="#9333ea"/>
+                       <stop offset="100%" stopColor="#7c3aed"/>
+                     </linearGradient>
+                   </defs>
+                 </svg>
+               </span>
             </h1>
 
             {/* Subheadline */}
@@ -588,6 +597,9 @@ export default function Home() {
       </section>
 
       <Footer />
+      
+      {/* Chatbot */}
+      <Chatbot />
     </div>
   );
 }

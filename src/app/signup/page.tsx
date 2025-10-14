@@ -6,7 +6,6 @@ import Navbar from "@/components/organisms/Navbar";
 import Footer from "@/components/organisms/Footer";
 
 // Business portal only
-type UserType = 'business';
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -30,13 +29,7 @@ export default function SignupPage() {
     }));
   };
 
-  const handleSendOtp = async () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setOtpSent(true);
-      setIsLoading(false);
-    }, 1000);
-  };
+  // OTP flow removed
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

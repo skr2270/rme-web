@@ -3,10 +3,35 @@
 import Link from "next/link";
 import Navbar from "@/components/organisms/Navbar";
 import Footer from "@/components/organisms/Footer";
+import { getBusinessStructuredData, getOrganizationStructuredData, getFAQStructuredData } from "@/components/seo/StructuredData";
 
 export default function Home() {
+  const businessStructuredData = getBusinessStructuredData();
+  const organizationStructuredData = getOrganizationStructuredData();
+  const faqStructuredData = getFAQStructuredData();
+
   return (
     <div className="min-h-screen bg-stone-50">
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(businessStructuredData)
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(organizationStructuredData)
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqStructuredData)
+        }}
+      />
+      
       <Navbar />
 
       {/* Hero Section */}

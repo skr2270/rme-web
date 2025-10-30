@@ -70,7 +70,8 @@ export async function GET(req: NextRequest) {
 		}
 
 		// Set secure, HTTP-only cookie for the session
-		cookies().set("rme_session", data.sessionId, {
+		const cookieStore = await cookies();
+		cookieStore.set("rme_session", data.sessionId, {
 			httpOnly: true,
 			secure: true,
 			sameSite: "lax",
@@ -79,7 +80,7 @@ export async function GET(req: NextRequest) {
 		});
 
 		return NextResponse.redirect(successRedirect);
-	} catch (error) {
+	} catch {
 		// Avoid leaking internals, just redirect with a minimal hint
 		const hint = encodeURIComponent("exception");
 		return NextResponse.redirect(`${failureRedirect}?error=${hint}`);

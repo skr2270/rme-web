@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
 import { Modal } from '@/components/organisms/Modal';
+import { graphqlRequest, normalizeIndianPhone } from '@/lib/graphql';
 
 export default function ReviewPage() {
   const router = useRouter();
@@ -14,6 +15,13 @@ export default function ReviewPage() {
   const employeeId = params.employeeId as string;
   const rating = searchParams.get('rating');
 
+  const numericRating = useMemo(() => {
+    const value = Number(rating);
+    if (!Number.isFinite(value)) return null;
+    if (value <= 0) return null;
+    return value;
+  }, [rating]);
+
   const [review, setReview] = useState('');
   const [showUserInfoModal, setShowUserInfoModal] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -21,17 +29,116 @@ export default function ReviewPage() {
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
 
+  const [submitting, setSubmitting] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [reviewId, setReviewId] = useState<string | null>(null);
+
   const handleSubmitReview = () => {
+    setError(null);
+    if (!numericRating) {
+      setError('Rating missing. Please go back and select a rating.');
+      return;
+    }
     setShowUserInfoModal(true);
   };
 
-  const handleContinueUserInfo = () => {
-    setShowUserInfoModal(false);
-    setShowOtpModal(true);
+  const handleContinueUserInfo = async () => {
+    setError(null);
+    const safeName = name.trim();
+    const normalizedPhone = normalizeIndianPhone(phone);
+    if (!safeName) {
+      setError('Please enter your name.');
+      return;
+    }
+    if (!normalizedPhone) {
+      setError('Please enter your phone number.');
+      return;
+    }
+    if (!numericRating) {
+      setError('Rating missing. Please go back and select a rating.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const data = await graphqlRequest<{ createPublicReview: { success: boolean; reviewId?: string; message?: string; errorMessage?: string; requiresOtpVerification?: boolean } }>(
+        `mutation CreatePublicReview($input: PublicCreateReviewInput!) {
+          createPublicReview(input: $input) {
+            success
+            reviewId
+            message
+            errorMessage
+            requiresOtpVerification
+          }
+        }`,
+        {
+          input: {
+            employeeId,
+            rating: numericRating,
+            comment: review.trim() || null,
+            customerName: safeName,
+            customerPhone: normalizedPhone,
+          },
+        },
+        'CreatePublicReview',
+      );
+
+      const result = data.createPublicReview;
+      if (!result.success || !result.reviewId) {
+        setError(result.errorMessage || 'Unable to submit review.');
+        return;
+      }
+
+      setReviewId(result.reviewId);
+      setShowUserInfoModal(false);
+      setShowOtpModal(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to submit review.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleSubmitOtp = () => {
-    router.push('/feedback/thank-you');
+  const handleSubmitOtp = async () => {
+    setError(null);
+    const otpValue = otp.replace(/\D/g, '');
+    if (!reviewId) {
+      setError('Missing review reference. Please resubmit your review.');
+      return;
+    }
+    if (otpValue.length < 4) {
+      setError('Please enter the OTP sent to your phone.');
+      return;
+    }
+
+    setVerifying(true);
+    try {
+      const data = await graphqlRequest<{ verifyReviewOtp: { success: boolean; token?: string; message?: string; errorMessage?: string } }>(
+        `mutation VerifyReviewOtp($input: VerifyReviewOtpInput!) {
+          verifyReviewOtp(input: $input) {
+            success
+            token
+            message
+            errorMessage
+          }
+        }`,
+        { input: { reviewId, otp: otpValue } },
+        'VerifyReviewOtp',
+      );
+
+      const result = data.verifyReviewOtp;
+      if (!result.success) {
+        setError(result.errorMessage || 'OTP verification failed.');
+        return;
+      }
+
+      router.push('/feedback/thank-you');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'OTP verification failed.');
+    } finally {
+      setVerifying(false);
+    }
   };
 
   return (
@@ -43,6 +150,7 @@ export default function ReviewPage() {
         Feel free to leave your comments here
       </h2>
       <p className="text-sm text-[#7C3AED] mb-4">Share your feedback & Win discount coupon</p>
+      {error ? <p className="text-sm text-red-600 mb-3">{error}</p> : null}
       <textarea
         value={review}
         onChange={(e) => setReview(e.target.value)}
@@ -54,6 +162,7 @@ export default function ReviewPage() {
       <Button
         onClick={handleSubmitReview}
         className="w-full py-3 bg-[#7C3AED] text-white rounded-full hover:bg-[#6D28D9]"
+        disabled={!numericRating}
       >
         Submit
       </Button>
@@ -79,8 +188,9 @@ export default function ReviewPage() {
         <Button
           onClick={handleContinueUserInfo}
           className="w-full py-3 bg-[#7C3AED] text-white rounded-full"
+          disabled={submitting}
         >
-          Continue
+          {submitting ? 'Sending OTP…' : 'Continue'}
         </Button>
       </Modal>
       <Modal isOpen={showOtpModal} onClose={() => setShowOtpModal(false)}>
@@ -88,25 +198,28 @@ export default function ReviewPage() {
         <p className="text-sm text-gray-600 mb-4">OTP has been sent to +91 {phone}</p>
         <div className="flex justify-between mb-4">
           {Array(6).fill('').map((_, index) => (
-            <Input
+            <input
               key={index}
               type="text"
-              maxLength={1}
               value={otp[index] || ''}
               onChange={(e) => {
                 const newOtp = otp.split('');
-                newOtp[index] = e.target.value;
+                newOtp[index] = e.target.value.slice(0, 1);
                 setOtp(newOtp.join(''));
               }}
               className="w-10 h-10 text-center border border-[#7C3AED] rounded-lg"
+              maxLength={1}
+              inputMode="numeric"
+              aria-label={`OTP digit ${index + 1}`}
             />
           ))}
         </div>
         <Button
           onClick={handleSubmitOtp}
           className="w-full py-3 bg-[#7C3AED] text-white rounded-full"
+          disabled={verifying}
         >
-          Submit
+          {verifying ? 'Verifying…' : 'Submit'}
         </Button>
       </Modal>
     </div>

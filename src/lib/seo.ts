@@ -2,7 +2,7 @@
 
 export const SEO_CONFIG = {
   siteName: 'Rate My Employee',
-  siteUrl: 'https://ratemyemployee.com',
+  siteUrl: 'https://ratemyemployee.in',
   defaultTitle: 'Rate My Employee | Stop Losing Customers To Bad Service',
   defaultDescription: 'Transform employee performance with real-time feedback. The only platform combining employee ratings, performance analytics, and smart recruitment. Set up in under 10 minutes. Join 500+ businesses across India.',
   defaultKeywords: [
@@ -26,7 +26,7 @@ export const SEO_CONFIG = {
     instagram: 'ratemyemployee'
   },
   contact: {
-    email: 'support@ratemyemployee.com',
+    email: 'support@ratemyemployee.in',
     phone: '+91-9876543210',
     address: 'India'
   }

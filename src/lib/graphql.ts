@@ -3,7 +3,7 @@ export type GraphQLResponse<T> = {
   errors?: Array<{ message?: string }>;
 };
 
-const DEFAULT_ENDPOINT = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://103.160.106.186:3000/graphql';
+const DEFAULT_ENDPOINT = process.env.NEXT_PUBLIC_BACKEND_URL || '/graphql';
 
 export async function graphqlRequest<TData, TVariables extends Record<string, unknown> = Record<string, unknown>>(
   query: string,

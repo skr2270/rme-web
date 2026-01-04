@@ -1,229 +1,273 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/organisms/Navbar';
 import Footer from '@/components/organisms/Footer';
 import { Button } from '@/components/atoms/Button';
+import { graphqlRequest } from '@/lib/graphql';
 
-// Employee data for programmatic SEO
-const employeeData = {
-  'john-doe-manager': {
-    name: 'John Doe',
-    position: 'Manager',
-    department: 'Operations',
-    experience: '5 years',
-    rating: 4.8,
-    reviews: 127,
-    specialties: ['Team Leadership', 'Customer Service', 'Operations Management'],
-    bio: 'Experienced manager with 5 years in customer service excellence. Known for exceptional team leadership and operational efficiency.'
-  },
-  'sarah-wilson-cashier': {
-    name: 'Sarah Wilson',
-    position: 'Cashier',
-    department: 'Front Desk',
-    experience: '3 years',
-    rating: 4.9,
-    reviews: 89,
-    specialties: ['Customer Service', 'Payment Processing', 'Problem Solving'],
-    bio: 'Dedicated cashier with excellent customer service skills and attention to detail. Committed to providing smooth checkout experiences.'
-  },
-  'mike-chen-cook': {
-    name: 'Mike Chen',
-    position: 'Head Chef',
-    department: 'Kitchen',
-    experience: '8 years',
-    rating: 4.7,
-    reviews: 156,
-    specialties: ['Culinary Arts', 'Menu Planning', 'Kitchen Management'],
-    bio: 'Creative head chef with 8 years of culinary experience. Passionate about creating exceptional dining experiences.'
-  },
-  'emma-davis-waitress': {
-    name: 'Emma Davis',
-    position: 'Waitress',
-    department: 'Service',
-    experience: '2 years',
-    rating: 4.6,
-    reviews: 73,
-    specialties: ['Table Service', 'Customer Relations', 'Menu Knowledge'],
-    bio: 'Friendly and efficient waitress dedicated to providing excellent dining service and memorable customer experiences.'
-  }
+type PublicEmployeeProfile = {
+  id: string;
+  ueid?: string | null;
+  name: string;
+  designation?: string | null;
+  photoUrl?: string | null;
+  business_id?: string | null;
+  location_id?: string | null;
 };
+
+type PublicBusinessProfile = {
+  business_id: string;
+  displayName?: string | null;
+  category?: number | null;
+};
+
+type RatingTextRow = {
+  categoryId: number;
+  rating: number;
+  text: string;
+};
+
+const RATINGS = Array.from({ length: 10 }, (_, i) => i + 1);
+const ITEM_HEIGHT = 56;
 
 export default function RateEmployeePage() {
   const router = useRouter();
   const params = useParams();
   const employeeId = params.employeeId as string;
-  const [rating, setRating] = useState(0);
-  const [hoveredRating, setHoveredRating] = useState(0);
+  const searchParams = useSearchParams();
 
-  const employee = employeeData[employeeId as keyof typeof employeeData];
+  const businessIdFromRoute = searchParams.get('business_id');
+  const locationIdFromRoute = searchParams.get('location_id');
 
-  if (!employee) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-stone-100 to-stone-200">
-        <Navbar />
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Employee Not Found</h1>
-            <p className="text-gray-600 mb-6">The employee you&apos;re looking for doesn&apos;t exist.</p>
-            <Button onClick={() => router.push('/feedback')}>
-              Back to Employee List
-            </Button>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  const wheelRef = useRef<HTMLDivElement | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [employee, setEmployee] = useState<PublicEmployeeProfile | null>(null);
+  const [businessProfile, setBusinessProfile] = useState<PublicBusinessProfile | null>(null);
+  const [ratingTexts, setRatingTexts] = useState<Record<number, string>>({});
+  const [rating, setRating] = useState<number>(8);
+  const initialRatingRef = useRef<number>(rating);
 
-  const handleRatingClick = (selectedRating: number) => {
-    setRating(selectedRating);
+  const businessId = businessIdFromRoute || employee?.business_id || null;
+  const categoryId = businessProfile?.category ?? null;
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      setLoading(true);
+      try {
+        const data = await graphqlRequest<{ publicEmployee: PublicEmployeeProfile }>(
+          `query PublicEmployee($employeeId: String!) {
+            publicEmployee(employeeId: $employeeId) {
+              id
+              ueid
+              name
+              designation
+              photoUrl
+              business_id
+              location_id
+            }
+          }`,
+          { employeeId },
+          'PublicEmployee',
+        );
+        if (!active) return;
+        setEmployee(data.publicEmployee);
+      } catch {
+        if (!active) return;
+        setEmployee(null);
+      } finally {
+        if (!active) return;
+        setLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [employeeId]);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      if (!businessId) {
+        setBusinessProfile(null);
+        return;
+      }
+      try {
+        const data = await graphqlRequest<{ publicBusinessProfile: PublicBusinessProfile }>(
+          `query PublicBusinessProfile($businessId: String!) {
+            publicBusinessProfile(businessId: $businessId) {
+              business_id
+              displayName
+              category
+            }
+          }`,
+          { businessId },
+          'PublicBusinessProfile',
+        );
+        if (!active) return;
+        setBusinessProfile(data.publicBusinessProfile);
+      } catch {
+        if (!active) return;
+        setBusinessProfile(null);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [businessId]);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      if (!categoryId) {
+        setRatingTexts({});
+        return;
+      }
+      try {
+        const data = await graphqlRequest<{ ratingTextsByCategory: RatingTextRow[] }>(
+          `query RatingTextsByCategory($categoryId: Int!) {
+            ratingTextsByCategory(categoryId: $categoryId) {
+              categoryId
+              rating
+              text
+            }
+          }`,
+          { categoryId },
+          'RatingTextsByCategory',
+        );
+        if (!active) return;
+        const map: Record<number, string> = {};
+        for (const row of data.ratingTextsByCategory || []) {
+          map[row.rating] = row.text;
+        }
+        setRatingTexts(map);
+      } catch {
+        if (!active) return;
+        setRatingTexts({});
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [categoryId]);
+
+  useEffect(() => {
+    const el = wheelRef.current;
+    if (!el) return;
+    const top = (initialRatingRef.current - 1) * ITEM_HEIGHT;
+    el.scrollTo({ top });
+  }, []);
+
+  const ratingLine = useMemo(() => {
+    const text = ratingTexts[rating];
+    if (!text) return `${rating}`;
+    return `${rating} • ${text}`;
+  }, [rating, ratingTexts]);
+
+  const handleScroll = () => {
+    const el = wheelRef.current;
+    if (!el) return;
+    const idx = Math.round(el.scrollTop / ITEM_HEIGHT);
+    const value = Math.min(10, Math.max(1, idx + 1));
+    setRating(value);
   };
 
-  const handleSubmit = () => {
-    if (rating > 0) {
-      router.push(`/feedback/${employeeId}/review?rating=${rating}`);
-    }
+  const handleNext = () => {
+    if (!employee) return;
+    const params = new URLSearchParams();
+    params.set('rating', String(rating));
+    const effectiveBusinessId = businessId || '';
+    const effectiveLocationId = locationIdFromRoute || employee.location_id || '';
+    if (effectiveBusinessId) params.set('business_id', effectiveBusinessId);
+    if (effectiveLocationId) params.set('location_id', effectiveLocationId);
+    router.push(`/feedback/${employeeId}/review?${params.toString()}`);
   };
-
-  const displayRating = hoveredRating || rating;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-stone-100 to-stone-200">
-      {/* Structured Data for Employee */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Person",
-            "name": employee.name,
-            "jobTitle": employee.position,
-            "worksFor": {
-              "@type": "Organization",
-              "name": "Rate My Employee Business"
-            },
-            "description": employee.bio,
-            "aggregateRating": {
-              "@type": "AggregateRating",
-              "ratingValue": employee.rating,
-              "reviewCount": employee.reviews,
-              "bestRating": 5,
-              "worstRating": 1
-            }
-          })
-        }}
-      />
-
+    <div className="min-h-screen bg-stone-50">
       <Navbar />
-      
-      <div className="relative pt-20 sm:pt-24 pb-12 sm:pb-16 px-4 sm:px-6 overflow-hidden">
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 right-0 w-[400px] sm:w-[600px] lg:w-[800px] h-[400px] sm:h-[600px] lg:h-[800px] bg-gradient-to-br from-stone-100/40 via-stone-100/30 to-stone-50/20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-[300px] sm:w-[500px] lg:w-[600px] h-[300px] sm:h-[500px] lg:h-[600px] bg-gradient-to-tr from-slate-100/40 via-gray-100/30 to-slate-50/20 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8 sm:mb-10">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-50 border border-yellow-200/50 text-violet-700 font-semibold text-sm mb-4 shadow-sm hover:shadow-md transition-all hover:scale-105 cursor-default">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
-              </span>
-              <span>Rate Your Experience</span>
-            </div>
-
-            {/* Main Headline */}
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-4 leading-[1.1] tracking-tight">
-              <span className="block">How was your experience with</span>
-              <span className="relative inline-block mt-1">
-                <span className="bg-gradient-to-r from-violet-600 via-violet-700 to-violet-600 bg-clip-text text-transparent animate-gradient">
-                  {employee.name}?
-                </span>
-                <svg className="absolute -bottom-1 left-0 w-full hidden sm:block" height="8" viewBox="0 0 300 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2 6C50 3 100 1 150 2C200 3 250 5 298 6" stroke="url(#gradient)" strokeWidth="2" strokeLinecap="round"/>
-                  <defs>
-                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#9333ea"/>
-                      <stop offset="100%" stopColor="#7c3aed"/>
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </span>
-            </h1>
-
-            {/* Subheadline */}
-            <p className="text-sm sm:text-base text-gray-600 mb-6 max-w-xl mx-auto leading-relaxed">
-              Help improve service quality by rating your experience with {employee.name}
-            </p>
+      <div className="pt-20 pb-10 px-4">
+        <div className="max-w-md mx-auto">
+          <div className="text-center mb-6">
+            <h1 className="text-xl font-bold text-gray-900">Edit Feedback</h1>
           </div>
 
-          {/* Employee Card */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all mb-8">
-            <div className="text-center mb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-violet-500 to-violet-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
-                {employee.name.split(' ').map(n => n[0]).join('')}
-              </div>
-              <h2 className="text-xl font-bold text-gray-900 mb-1">{employee.name}</h2>
-              <p className="text-violet-600 font-semibold mb-2">{employee.position}</p>
-              <div className="flex items-center justify-center gap-4 text-sm text-gray-600">
-                <span>⭐ {employee.rating}/5</span>
-                <span>•</span>
-                <span>{employee.reviews} reviews</span>
-                <span>•</span>
-                <span>{employee.experience} experience</span>
-              </div>
-            </div>
-
-            {/* Rating Section */}
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Rate your experience (1-10)
-              </h3>
-              
-              <div className="flex justify-center gap-2 mb-6">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => handleRatingClick(star)}
-                    onMouseEnter={() => setHoveredRating(star)}
-                    onMouseLeave={() => setHoveredRating(0)}
-                    className={`w-10 h-10 rounded-lg text-lg font-bold transition-all hover:scale-110 ${
-                      star <= displayRating
-                        ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white shadow-lg'
-                        : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                    }`}
-                  >
-                    {star}
-                  </button>
-                ))}
-              </div>
-
-              {rating > 0 && (
-                <div className="mb-6">
-                  <p className="text-sm text-gray-600 mb-2">You rated: {rating}/10</p>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-gradient-to-r from-yellow-400 to-yellow-500 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${(rating / 10) * 100}%` }}
-                    ></div>
+          {loading ? (
+            <div className="text-sm text-gray-600 text-center">Loading…</div>
+          ) : !employee ? (
+            <div className="text-sm text-gray-600 text-center">Employee not found.</div>
+          ) : (
+            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+              <div className="p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  {employee.photoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={employee.photoUrl}
+                      alt={employee.name}
+                      className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-sm font-bold text-gray-700">
+                      {(employee.name || 'E')
+                        .split(' ')
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .map((p) => p[0])
+                        .join('')}
+                    </div>
+                  )}
+                  <div>
+                    <div className="text-base font-bold text-gray-900 leading-tight">{employee.name}</div>
+                    <div className="text-sm text-gray-600">{employee.designation || '—'}</div>
                   </div>
                 </div>
-              )}
+                <div className="text-sm font-semibold text-gray-700">{rating}/10</div>
+              </div>
 
-              <Button
-                onClick={handleSubmit}
-                disabled={rating === 0}
-                className="w-full bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white py-3 px-6 rounded-xl font-bold text-base shadow-2xl shadow-violet-500/30 hover:shadow-violet-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
-              >
-                {rating === 0 ? 'Select a rating to continue' : 'Continue to Review'}
-              </Button>
+              <div className="h-px bg-gray-200" />
+
+              <div className="p-4">
+                <div className="text-sm text-gray-500 mb-3">Select rating</div>
+
+                <div className="relative">
+                  <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-14 rounded-xl border border-violet-200 bg-violet-50/60 pointer-events-none" />
+                  <div
+                    ref={wheelRef}
+                    onScroll={handleScroll}
+                    className="h-64 overflow-y-auto snap-y snap-mandatory [scrollbar-width:none]"
+                    style={{ WebkitOverflowScrolling: 'touch' }}
+                  >
+                    <div style={{ height: ITEM_HEIGHT * 2 }} />
+                    {RATINGS.map((r) => (
+                      <div
+                        key={r}
+                        className="snap-center flex items-center justify-center"
+                        style={{ height: ITEM_HEIGHT }}
+                      >
+                        <div className={r === rating ? 'text-3xl font-extrabold text-gray-900' : 'text-2xl font-bold text-gray-400'}>
+                          {r}
+                        </div>
+                      </div>
+                    ))}
+                    <div style={{ height: ITEM_HEIGHT * 2 }} />
+                  </div>
+                </div>
+
+                <div className="mt-4 text-center text-sm text-gray-700 font-semibold">{ratingLine}</div>
+
+                <Button
+                  onClick={handleNext}
+                  className="w-full mt-6 bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white py-3 px-6 rounded-xl font-bold text-base shadow-2xl shadow-violet-500/30 hover:shadow-violet-500/50 transition-all"
+                >
+                  Next
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 

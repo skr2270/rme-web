@@ -76,7 +76,7 @@ export async function generateMetadata({ params }: { params: { employeeId: strin
     openGraph: {
       title,
       description,
-      url: `https://ratemyemployee.com/feedback/${params.employeeId}/rate`,
+      url: `https://ratemyemployee.in/feedback/${params.employeeId}/rate`,
       siteName: 'Rate My Employee',
       images: [
         {

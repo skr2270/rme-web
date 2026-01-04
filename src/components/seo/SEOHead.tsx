@@ -16,7 +16,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   title,
   description,
   canonicalUrl,
-  ogImage = 'https://ratemyemployee.com/og-image.jpg',
+  ogImage = 'https://ratemyemployee.in/og-image.jpg',
   ogType = 'website',
   twitterCard = 'summary_large_image',
   keywords = [],
@@ -42,7 +42,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={fullDescription} />
       <meta property="og:image" content={ogImage} />
-      <meta property="og:url" content={canonicalUrl || 'https://ratemyemployee.com'} />
+      <meta property="og:url" content={canonicalUrl || 'https://ratemyemployee.in'} />
       <meta property="og:type" content={ogType} />
       <meta property="og:site_name" content="Rate My Employee" />
       <meta property="og:locale" content="en_US" />

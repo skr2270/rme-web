@@ -37,14 +37,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://ratemyemployee.com'),
+  metadataBase: new URL('https://ratemyemployee.in'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: "Rate My Employee | Stop Losing Customers To Bad Service",
     description: "Transform employee performance with real-time feedback. The only platform combining employee ratings, performance analytics, and smart recruitment. Set up in under 10 minutes. Join 500+ businesses across India.",
-    url: 'https://ratemyemployee.com',
+    url: 'https://ratemyemployee.in',
     siteName: 'Rate My Employee',
     images: [
       {

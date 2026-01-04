@@ -4,7 +4,7 @@ export const getBusinessStructuredData = () => {
     "@type": "SoftwareApplication",
     "name": "Rate My Employee",
     "description": "Transform employee performance with real-time feedback. The only platform combining employee ratings, performance analytics, and smart recruitment for better service quality.",
-    "url": "https://ratemyemployee.com",
+    "url": "https://ratemyemployee.in",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Web Browser",
     "offers": {
@@ -23,8 +23,8 @@ export const getBusinessStructuredData = () => {
     "provider": {
       "@type": "Organization",
       "name": "Rate My Employee",
-      "url": "https://ratemyemployee.com",
-      "logo": "https://ratemyemployee.com/logo.png",
+      "url": "https://ratemyemployee.in",
+      "logo": "https://ratemyemployee.in/logo.png",
       "contactPoint": {
         "@type": "ContactPoint",
         "telephone": "+91-9876543210",
@@ -46,7 +46,7 @@ export const getBusinessStructuredData = () => {
       "Recruitment insights",
       "Mobile app support"
     ],
-    "screenshot": "https://ratemyemployee.com/screenshot.jpg",
+    "screenshot": "https://ratemyemployee.in/screenshot.jpg",
     "softwareVersion": "1.0.0",
     "datePublished": "2024-01-01",
     "dateModified": new Date().toISOString().split('T')[0]
@@ -58,8 +58,8 @@ export const getOrganizationStructuredData = () => {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Rate My Employee",
-    "url": "https://ratemyemployee.com",
-    "logo": "https://ratemyemployee.com/logo.png",
+    "url": "https://ratemyemployee.in",
+    "logo": "https://ratemyemployee.in/logo.png",
     "description": "Leading employee performance management platform for businesses across India",
     "foundingDate": "2024",
     "founders": [
@@ -72,7 +72,7 @@ export const getOrganizationStructuredData = () => {
       "@type": "ContactPoint",
       "telephone": "+91-9876543210",
       "contactType": "customer service",
-      "email": "support@ratemyemployee.com",
+      "email": "support@ratemyemployee.in",
       "availableLanguage": ["English", "Hindi"]
     },
     "address": {

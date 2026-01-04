@@ -7,6 +7,23 @@ const nextConfig = {
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'ui-avatars.com',
+        pathname: '/api/**',
+      },
+      {
+        protocol: 'http',
+        hostname: '103.160.106.186',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '103.160.106.186',
+        pathname: '/**',
+      },
+    ],
   },
   
   // Compression for better performance
@@ -83,7 +100,19 @@ const nextConfig = {
   
   // Rewrites for better URL structure
   async rewrites() {
+    const backend = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+    const trimmed = backend ? backend.replace(/\/$/, '') : '';
+    const graphqlTarget = trimmed ? (trimmed.endsWith('/graphql') ? trimmed : `${trimmed}/graphql`) : null;
+
     return [
+      ...(graphqlTarget
+        ? [
+            {
+              source: '/graphql',
+              destination: graphqlTarget,
+            },
+          ]
+        : []),
       {
         source: '/employee/:path*',
         destination: '/feedback/:path*',

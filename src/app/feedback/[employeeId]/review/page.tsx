@@ -144,7 +144,7 @@ export default function ReviewPage() {
 
   const handleSubmitOtp = async () => {
     if (!reviewId) return;
-    if ((otp || '').trim().length !== 6) return;
+    if ((otp || '').trim().length !== 4) return;
 
     setVerifying(true);
     setError(null);
@@ -524,7 +524,7 @@ export default function ReviewPage() {
               
               <div className="space-y-6">
                 <div className="flex justify-center space-x-2">
-                  {Array(6).fill('').map((_, index) => (
+                  {Array(4).fill('').map((_, index) => (
                     <Input
                       key={index}
                       type="text"
@@ -542,7 +542,7 @@ export default function ReviewPage() {
                 
                 <Button
                   onClick={handleSubmitOtp}
-                  disabled={otp.length !== 6 || verifying || !reviewId}
+                  disabled={otp.length !== 4 || verifying || !reviewId}
                   className="w-full bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white py-3 px-6 rounded-xl font-bold text-base shadow-2xl shadow-violet-500/30 hover:shadow-violet-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
                 >
                   {verifying ? 'Verifying…' : 'Verify & Submit Feedback'}

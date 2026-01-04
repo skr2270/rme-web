@@ -6,9 +6,10 @@ interface InputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   className?: string;
+  maxLength?: number;
 }
 
-export const Input: React.FC<InputProps> = ({ type, placeholder, value, onChange, className }) => {
+export const Input: React.FC<InputProps> = ({ type, placeholder, value, onChange, className, maxLength }) => {
   return (
     <input
       type={type}
@@ -16,6 +17,7 @@ export const Input: React.FC<InputProps> = ({ type, placeholder, value, onChange
       value={value}
       onChange={onChange}
       className={className}
+      maxLength={maxLength}
       aria-label={placeholder || 'Input field'}
     />
   );

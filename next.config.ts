@@ -60,15 +60,12 @@ const nextConfig: NextConfig = {
   },
 
   async rewrites() {
-    const backend = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
-    if (!backend) {
-      return [
-        {
-          source: '/employee/:path*',
-          destination: '/feedback/:path*',
-        },
-      ];
-    }
+    // IMPORTANT: Browser pages call same-origin /graphql.
+    // This rewrite must exist in production; otherwise POST /graphql returns 405.
+    const backend =
+      process.env.BACKEND_URL ||
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      'http://103.160.106.186:3000';
 
     const trimmed = backend.replace(/\/$/, '');
     const graphqlTarget = trimmed.endsWith('/graphql') ? trimmed : `${trimmed}/graphql`;

@@ -100,19 +100,21 @@ const nextConfig = {
   
   // Rewrites for better URL structure
   async rewrites() {
-    const backend = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
-    const trimmed = backend ? backend.replace(/\/$/, '') : '';
-    const graphqlTarget = trimmed ? (trimmed.endsWith('/graphql') ? trimmed : `${trimmed}/graphql`) : null;
+    // IMPORTANT: Browser pages call same-origin /graphql.
+    // This rewrite must exist in production; otherwise POST /graphql returns 405 and feedback pages show "Employee not found".
+    const backend =
+      process.env.BACKEND_URL ||
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      'http://103.160.106.186:3000';
+
+    const trimmed = backend.replace(/\/$/, '');
+    const graphqlTarget = trimmed.endsWith('/graphql') ? trimmed : `${trimmed}/graphql`;
 
     return [
-      ...(graphqlTarget
-        ? [
-            {
-              source: '/graphql',
-              destination: graphqlTarget,
-            },
-          ]
-        : []),
+      {
+        source: '/graphql',
+        destination: graphqlTarget,
+      },
       {
         source: '/employee/:path*',
         destination: '/feedback/:path*',

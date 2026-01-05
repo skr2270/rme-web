@@ -3,14 +3,41 @@ export type GraphQLResponse<T> = {
   errors?: Array<{ message?: string }>;
 };
 
-const DEFAULT_ENDPOINT = process.env.NEXT_PUBLIC_BACKEND_URL || '/graphql';
+function resolveGraphqlEndpoint(): string {
+  // Default to same-origin proxy to avoid mixed-content/CORS issues.
+  // Next.js rewrites should forward /graphql to the backend.
+  const fallback = '/graphql';
+
+  // Allow explicit HTTPS endpoint override (safe from HTTPS pages).
+  const publicBackend = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+  if (publicBackend) {
+    if (publicBackend.startsWith('/')) return publicBackend;
+    if (publicBackend.startsWith('https://')) {
+      const trimmed = publicBackend.replace(/\/$/, '');
+      return trimmed.endsWith('/graphql') ? trimmed : `${trimmed}/graphql`;
+    }
+    // Ignore http:// here; it will be blocked as mixed content in browsers.
+  }
+
+  // On the server, allow BACKEND_URL (can be http) for SSR/CLI usage.
+  if (typeof window === 'undefined') {
+    const serverBackend = process.env.BACKEND_URL || '';
+    if (serverBackend) {
+      const trimmed = serverBackend.replace(/\/$/, '');
+      return trimmed.endsWith('/graphql') ? trimmed : `${trimmed}/graphql`;
+    }
+  }
+
+  return fallback;
+}
 
 export async function graphqlRequest<TData, TVariables extends Record<string, unknown> = Record<string, unknown>>(
   query: string,
   variables?: TVariables,
   operationName?: string,
 ): Promise<TData> {
-  const res = await fetch(DEFAULT_ENDPOINT, {
+  const endpoint = resolveGraphqlEndpoint();
+  const res = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

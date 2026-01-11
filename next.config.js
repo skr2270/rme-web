@@ -14,13 +14,8 @@ const nextConfig = {
         pathname: '/api/**',
       },
       {
-        protocol: 'http',
-        hostname: '103.160.106.186',
-        pathname: '/**',
-      },
-      {
         protocol: 'https',
-        hostname: '103.160.106.186',
+        hostname: 'api.ratemyemployee.in',
         pathname: '/**',
       },
     ],
@@ -105,7 +100,7 @@ const nextConfig = {
     const backend =
       process.env.BACKEND_URL ||
       process.env.NEXT_PUBLIC_BACKEND_URL ||
-      'http://103.160.106.186:3000';
+      'https://api.ratemyemployee.in/graphql';
 
     const trimmed = backend.replace(/\/$/, '');
     const graphqlTarget = trimmed.endsWith('/graphql') ? trimmed : `${trimmed}/graphql`;

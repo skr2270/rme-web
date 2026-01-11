@@ -2,6 +2,13 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started..
 
+### Backend configuration
+
+The web app calls GraphQL via same-origin `/graphql`, and Next.js rewrites proxy that to the backend.
+
+- Backend URL: `https://api.ratemyemployee.in/graphql`
+- Optional env vars (see `.env.example`): `BACKEND_URL`, `NEXT_PUBLIC_BACKEND_URL`
+
 First, run the development server:
 
 ```bash

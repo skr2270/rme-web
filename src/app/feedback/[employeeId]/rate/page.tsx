@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import Navbar from '@/components/organisms/Navbar';
-import Footer from '@/components/organisms/Footer';
 import { Button } from '@/components/atoms/Button';
 import { graphqlRequest } from '@/lib/graphql';
 
@@ -30,7 +28,19 @@ type RatingTextRow = {
 };
 
 const RATINGS = Array.from({ length: 10 }, (_, i) => i + 1);
-const ITEM_HEIGHT = 56;
+const ITEM_HEIGHT = 74;
+
+function clamp(n: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, n));
+}
+
+function starStyle(distance: number): { scale: number; opacity: number } {
+  // Active is biggest, others are smaller and fade out.
+  if (distance <= 0) return { scale: 1, opacity: 1 };
+  if (distance === 1) return { scale: 0.78, opacity: 0.6 };
+  if (distance === 2) return { scale: 0.62, opacity: 0.35 };
+  return { scale: 0.52, opacity: 0.18 };
+}
 
 export default function RateEmployeePage() {
   const router = useRouter();
@@ -43,6 +53,8 @@ export default function RateEmployeePage() {
 
   const wheelRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [refreshTick, setRefreshTick] = useState(0);
   const [employee, setEmployee] = useState<PublicEmployeeProfile | null>(null);
   const [businessProfile, setBusinessProfile] = useState<PublicBusinessProfile | null>(null);
   const [ratingTexts, setRatingTexts] = useState<Record<number, string>>({});
@@ -56,6 +68,7 @@ export default function RateEmployeePage() {
     let active = true;
     (async () => {
       setLoading(true);
+      setLoadError(null);
       try {
         const data = await graphqlRequest<{ publicEmployee: PublicEmployeeProfile }>(
           `query PublicEmployee($employeeId: String!) {
@@ -74,8 +87,9 @@ export default function RateEmployeePage() {
         );
         if (!active) return;
         setEmployee(data.publicEmployee);
-      } catch {
+      } catch (e) {
         if (!active) return;
+        setLoadError(e instanceof Error ? e.message : 'Unable to load employee.');
         setEmployee(null);
       } finally {
         if (!active) return;
@@ -85,7 +99,7 @@ export default function RateEmployeePage() {
     return () => {
       active = false;
     };
-  }, [employeeId]);
+  }, [employeeId, refreshTick]);
 
   useEffect(() => {
     let active = true;
@@ -171,7 +185,7 @@ export default function RateEmployeePage() {
     const el = wheelRef.current;
     if (!el) return;
     const idx = Math.round(el.scrollTop / ITEM_HEIGHT);
-    const value = Math.min(10, Math.max(1, idx + 1));
+    const value = clamp(idx + 1, 1, 10);
     setRating(value);
   };
 
@@ -187,91 +201,131 @@ export default function RateEmployeePage() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      <Navbar />
-      <div className="pt-20 pb-10 px-4">
-        <div className="max-w-md mx-auto">
-          <div className="text-center mb-6">
-            <h1 className="text-xl font-bold text-gray-900">Edit Feedback</h1>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-md mx-auto min-h-screen flex flex-col">
+        {/* Top hero */}
+        <div className="relative">
+          <div className="h-72 bg-gradient-to-b from-violet-700 to-violet-900 overflow-hidden">
+            {employee?.photoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={employee.photoUrl} alt={employee.name} className="w-full h-full object-cover opacity-95" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-white/90">
+                <div className="text-center">
+                  <div className="text-5xl font-extrabold">{(employee?.name || 'E').slice(0, 1).toUpperCase()}</div>
+                  <div className="text-sm font-semibold opacity-80">Rate My Employee</div>
+                </div>
+              </div>
+            )}
+
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
           </div>
 
+          {/* Small badge */}
+          <div className="absolute left-1/2 -translate-x-1/2 -bottom-4">
+            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-lg">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/stars/h_star.svg" alt="Star" className="w-7 h-7" draggable={false} />
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 px-5 pt-8 pb-28">
           {loading ? (
             <div className="text-sm text-gray-600 text-center">Loading…</div>
           ) : !employee ? (
-            <div className="text-sm text-gray-600 text-center">Employee not found.</div>
-          ) : (
-            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm">
-              <div className="p-4 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  {employee.photoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={employee.photoUrl}
-                      alt={employee.name}
-                      className="w-12 h-12 rounded-full object-cover border border-gray-200"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-sm font-bold text-gray-700">
-                      {(employee.name || 'E')
-                        .split(' ')
-                        .filter(Boolean)
-                        .slice(0, 2)
-                        .map((p) => p[0])
-                        .join('')}
-                    </div>
-                  )}
-                  <div>
-                    <div className="text-base font-bold text-gray-900 leading-tight">{employee.name}</div>
-                    <div className="text-sm text-gray-600">{employee.designation || '—'}</div>
+            <div className="text-sm text-gray-600 text-center">
+              {loadError ? (
+                <div className="space-y-3">
+                  <div>Unable to load right now. Please try again.</div>
+                  <div className="text-xs text-gray-500">{loadError}</div>
+                  <div className="flex items-center justify-center">
+                    <Button
+                      onClick={() => setRefreshTick((n) => n + 1)}
+                      className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-2xl"
+                    >
+                      Retry
+                    </Button>
                   </div>
                 </div>
-                <div className="text-sm font-semibold text-gray-700">{rating}/10</div>
+              ) : (
+                <div>Employee not found.</div>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="text-center">
+                <div className="text-3xl font-extrabold text-gray-900">{employee.name}</div>
+                <div className="mt-1 text-base text-gray-600">{employee.designation || '—'}</div>
               </div>
 
-              <div className="h-px bg-gray-200" />
-
-              <div className="p-4">
-                <div className="text-sm text-gray-500 mb-3">Select rating</div>
-
+              <div className="mt-8">
                 <div className="relative">
-                  <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-14 rounded-xl border border-violet-200 bg-violet-50/60 pointer-events-none" />
+                  <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[82px] rounded-3xl bg-violet-50 border border-violet-200 pointer-events-none" />
+
                   <div
                     ref={wheelRef}
                     onScroll={handleScroll}
-                    className="h-64 overflow-y-auto snap-y snap-mandatory [scrollbar-width:none]"
+                    className="h-[320px] overflow-y-auto snap-y snap-mandatory [scrollbar-width:none]"
                     style={{ WebkitOverflowScrolling: 'touch' }}
+                    aria-label="Select rating"
                   >
                     <div style={{ height: ITEM_HEIGHT * 2 }} />
-                    {RATINGS.map((r) => (
-                      <div
-                        key={r}
-                        className="snap-center flex items-center justify-center"
-                        style={{ height: ITEM_HEIGHT }}
-                      >
-                        <div className={r === rating ? 'text-3xl font-extrabold text-gray-900' : 'text-2xl font-bold text-gray-400'}>
-                          {r}
+                    {RATINGS.map((r) => {
+                      const dist = Math.abs(r - rating);
+                      const { scale, opacity } = starStyle(dist);
+                      const size = r === rating ? 118 : 96;
+
+                      return (
+                        <div
+                          key={r}
+                          className="snap-center flex items-center justify-center"
+                          style={{ height: ITEM_HEIGHT }}
+                        >
+                          <div
+                            className="transition-all duration-200"
+                            style={{
+                              transform: `scale(${scale})`,
+                              opacity,
+                            }}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={`/stars/${r}.png`}
+                              alt={`${r} star`}
+                              width={size}
+                              height={size}
+                              className="select-none"
+                              draggable={false}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                     <div style={{ height: ITEM_HEIGHT * 2 }} />
                   </div>
                 </div>
 
-                <div className="mt-4 text-center text-sm text-gray-700 font-semibold">{ratingLine}</div>
-
-                <Button
-                  onClick={handleNext}
-                  className="w-full mt-6 bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white py-3 px-6 rounded-xl font-bold text-base shadow-2xl shadow-violet-500/30 hover:shadow-violet-500/50 transition-all"
-                >
-                  Next
-                </Button>
+                <div className="mt-4 text-center text-sm font-semibold text-gray-800">{ratingLine}</div>
               </div>
-            </div>
+            </>
           )}
         </div>
-      </div>
 
-      <Footer />
+        {/* Bottom CTA */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur border-t border-gray-100">
+          <div className="max-w-md mx-auto p-5">
+            <Button
+              onClick={handleNext}
+              disabled={!employee || loading}
+              className="w-full bg-violet-700 hover:bg-violet-800 text-white py-4 rounded-2xl font-bold text-lg"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

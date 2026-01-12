@@ -8,6 +8,20 @@ function resolveGraphqlEndpoint(): string {
   // Next.js rewrites should forward /graphql to the backend.
   const fallback = '/graphql';
 
+  // If the site is running on our public domain and no explicit endpoint is
+  // configured, prefer calling the API directly to avoid intermittent proxy
+  // 502s/timeouts from the web host.
+  if (typeof window !== 'undefined') {
+    const host = (window.location?.hostname || '').toLowerCase();
+    const isPublicDomain = host === 'ratemyemployee.in' || host.endsWith('.ratemyemployee.in');
+    if (isPublicDomain) {
+      const publicBackend = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+      if (!publicBackend) {
+        return 'https://api.ratemyemployee.in/graphql';
+      }
+    }
+  }
+
   // Allow explicit HTTPS endpoint override (safe from HTTPS pages).
   const publicBackend = process.env.NEXT_PUBLIC_BACKEND_URL || '';
   if (publicBackend) {
@@ -31,20 +45,41 @@ function resolveGraphqlEndpoint(): string {
   return fallback;
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function graphqlRequest<TData, TVariables extends Record<string, unknown> = Record<string, unknown>>(
   query: string,
   variables?: TVariables,
   operationName?: string,
 ): Promise<TData> {
   const endpoint = resolveGraphqlEndpoint();
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify({ query, variables, operationName }),
-  });
+  const body = JSON.stringify({ query, variables, operationName });
+
+  const doFetch = () =>
+    fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body,
+    });
+
+  let res: Response;
+  try {
+    res = await doFetch();
+  } catch (e) {
+    // Network failure (DNS, offline, etc.).
+    throw e instanceof Error ? e : new Error('Network error');
+  }
+
+  // Retry once for transient gateway/upstream failures.
+  if (!res.ok && [502, 503, 504].includes(res.status)) {
+    await sleep(300);
+    res = await doFetch();
+  }
 
   if (!res.ok) {
     throw new Error(`GraphQL request failed (${res.status})`);

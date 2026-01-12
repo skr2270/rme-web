@@ -85,16 +85,6 @@ function ScratchCard({
       ctx.restore();
     }
     ctx.globalAlpha = 1;
-
-    // Label
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.font = '700 18px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Scratch here', w / 2, h / 2 - 10);
-    ctx.font = '600 13px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto';
-    ctx.fillStyle = 'rgba(255,255,255,0.75)';
-    ctx.fillText('to reveal your coupon', w / 2, h / 2 + 12);
   };
 
   const getRelativePoint = (ev: PointerEvent) => {
@@ -271,7 +261,7 @@ export default function ThankYouClient() {
               className={
                 stage >= 1
                   ? 'opacity-100 translate-y-0 transition-all duration-500'
-                  : 'opacity-0 translate-y-6 transition-all duration-500'
+                  : 'opacity-0 -translate-y-2 transition-all duration-500'
               }
             >
               <div className="flex items-center justify-center">
@@ -284,24 +274,12 @@ export default function ThankYouClient() {
               </div>
             </div>
 
-            {/* Stage 1 placeholder */}
-            <div
-              className={
-                stage === 1
-                  ? 'mt-12 opacity-100 scale-100 transition-all duration-500'
-                  : 'mt-12 opacity-0 scale-95 transition-all duration-500'
-              }
-              aria-hidden={stage !== 1}
-            >
-              <div className="w-[310px] max-w-full h-[310px] rounded-[42px] bg-gray-200/90" />
-            </div>
-
             {/* Stage 2 scratch */}
             <div
               className={
                 stage >= 2
                   ? 'mt-10 opacity-100 translate-y-0 transition-all duration-700'
-                  : 'mt-10 opacity-0 translate-y-6 transition-all duration-700'
+                  : 'mt-10 opacity-0 translate-y-4 transition-all duration-700'
               }
             >
               <div className="flex items-center justify-center">
@@ -309,24 +287,41 @@ export default function ThankYouClient() {
                   <div className="absolute inset-0 bg-gradient-to-b from-yellow-300 to-yellow-500" />
                   <div className="absolute inset-0 opacity-50 bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.0),rgba(255,255,255,0.0)_12px,rgba(0,0,0,0.06)_12px,rgba(0,0,0,0.06)_24px)]" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-[44px] font-extrabold text-black/45">Scratch</div>
+                    {!scratched ? <div className="text-[44px] font-extrabold text-black/45">Scratch</div> : null}
                   </div>
+
+                  {scratched ? (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="px-6 py-4 rounded-2xl bg-white/40 border border-white/50 shadow-lg">
+                        <div className="text-xs font-semibold text-black/50 text-center">COUPON CODE</div>
+                        <div className="mt-1 text-2xl font-extrabold tracking-wider text-black/70 text-center">
+                          {couponCode}
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
                 </ScratchCard>
               </div>
 
-              <div className="mt-8 flex items-center justify-center gap-3 text-white/70">
-                <div className="text-lg">Coupon Code:</div>
-                <div className="text-xl font-extrabold tracking-wide text-white">{couponCode}</div>
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className="text-white/80 hover:text-white transition-colors"
-                  aria-label="Copy coupon code"
-                >
-                  <CopyIcon />
-                </button>
-              </div>
-              {copied ? <div className="mt-2 text-center text-xs text-white/75">Copied!</div> : null}
+              {!scratched ? (
+                <div className="mt-6 text-center text-white/75 text-sm font-semibold">Scratch to reveal your coupon</div>
+              ) : (
+                <>
+                  <div className="mt-8 flex items-center justify-center gap-3 text-white/70">
+                    <div className="text-lg">Coupon Code:</div>
+                    <div className="text-xl font-extrabold tracking-wide text-white">{couponCode}</div>
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      className="text-white/80 hover:text-white transition-colors"
+                      aria-label="Copy coupon code"
+                    >
+                      <CopyIcon />
+                    </button>
+                  </div>
+                  {copied ? <div className="mt-2 text-center text-xs text-white/75">Copied!</div> : null}
+                </>
+              )}
             </div>
 
             <div className="mt-auto pt-10 text-center text-white/70">

@@ -265,7 +265,19 @@ export default function ThankYouClient() {
               }
             >
               <div className="flex items-center justify-center">
-                <TYStars />
+                <div className={stage >= 1 ? 'ty-burst ty-burst--on' : 'ty-burst'}>
+                  <TYStars />
+                  <span className="ty-ring" />
+                  <span className="ty-ring ty-ring--2" />
+                  <span className="ty-spark s1" />
+                  <span className="ty-spark s2" />
+                  <span className="ty-spark s3" />
+                  <span className="ty-spark s4" />
+                  <span className="ty-spark s5" />
+                  <span className="ty-spark s6" />
+                  <span className="ty-spark s7" />
+                  <span className="ty-spark s8" />
+                </div>
               </div>
 
               <div className="mt-6 text-center">
@@ -333,6 +345,87 @@ export default function ThankYouClient() {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .ty-burst {
+          position: relative;
+          width: 72px;
+          height: 72px;
+          display: grid;
+          place-items: center;
+          transform: scale(0.2);
+          opacity: 0;
+          filter: drop-shadow(0 0 0 rgba(255, 214, 102, 0));
+          transition: opacity 200ms ease-out;
+        }
+
+        .ty-burst--on {
+          opacity: 1;
+          animation: ty-pop 900ms cubic-bezier(0.3, 1.5, 0.6, 1) forwards;
+        }
+
+        .ty-ring {
+          position: absolute;
+          width: 124px;
+          height: 124px;
+          border-radius: 999px;
+          border: 2px solid rgba(255, 214, 102, 0.7);
+          opacity: 0;
+          transform: scale(0.2);
+        }
+
+        .ty-burst--on .ty-ring {
+          animation: ty-ring 820ms ease-out forwards;
+        }
+
+        .ty-ring--2 {
+          width: 82px;
+          height: 82px;
+          border-color: rgba(255, 236, 167, 0.55);
+          animation-delay: 120ms;
+        }
+
+        .ty-spark {
+          position: absolute;
+          width: 8px;
+          height: 8px;
+          border-radius: 999px;
+          background: radial-gradient(circle, #fff1a6 0%, #f9c74f 60%, rgba(249, 199, 79, 0) 100%);
+          opacity: 0;
+        }
+
+        .ty-burst--on .ty-spark {
+          animation: ty-spark 900ms ease-out forwards;
+        }
+
+        .ty-spark.s1 { transform: translate(0, -18px); animation-delay: 80ms; }
+        .ty-spark.s2 { transform: translate(16px, -8px); animation-delay: 120ms; }
+        .ty-spark.s3 { transform: translate(18px, 10px); animation-delay: 160ms; }
+        .ty-spark.s4 { transform: translate(0, 20px); animation-delay: 200ms; }
+        .ty-spark.s5 { transform: translate(-16px, 10px); animation-delay: 140ms; }
+        .ty-spark.s6 { transform: translate(-18px, -8px); animation-delay: 100ms; }
+        .ty-spark.s7 { transform: translate(8px, 22px); animation-delay: 240ms; }
+        .ty-spark.s8 { transform: translate(-10px, -22px); animation-delay: 220ms; }
+
+        @keyframes ty-pop {
+          0% { transform: scale(0.15) rotate(-10deg); filter: drop-shadow(0 0 0 rgba(255, 214, 102, 0)); }
+          55% { transform: scale(1.18) rotate(3deg); filter: drop-shadow(0 16px 26px rgba(255, 214, 102, 0.55)); }
+          80% { transform: scale(0.98) rotate(0deg); filter: drop-shadow(0 10px 16px rgba(255, 214, 102, 0.45)); }
+          100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 8px 12px rgba(255, 214, 102, 0.35)); }
+        }
+
+        @keyframes ty-spark {
+          0% { opacity: 0; transform: scale(0.2) translate(0, 0); }
+          30% { opacity: 1; }
+          100% { opacity: 0; transform: scale(1.35) translate(0px, -10px); }
+        }
+
+        @keyframes ty-ring {
+          0% { opacity: 0; transform: scale(0.2); }
+          35% { opacity: 0.9; }
+          100% { opacity: 0; transform: scale(1.6); }
+        }
+      `}</style>
     </div>
   );
 }

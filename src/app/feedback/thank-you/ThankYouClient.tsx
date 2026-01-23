@@ -187,7 +187,7 @@ function ScratchCard({
   return (
     <div
       ref={wrapperRef}
-      className="relative w-[310px] max-w-full h-[310px] rounded-[42px] overflow-hidden shadow-2xl select-none"
+      className="relative w-[78vw] max-w-[310px] aspect-square rounded-[36px] sm:rounded-[42px] overflow-hidden shadow-2xl select-none"
       aria-label="Scratch to reveal coupon"
     >
       {children}
@@ -243,8 +243,8 @@ export default function ThankYouClient() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-md mx-auto min-h-screen px-5 pt-10 pb-10">
-        <div className="relative min-h-[calc(100vh-80px)] rounded-[56px] overflow-hidden bg-gradient-to-b from-violet-700 to-violet-900">
+      <div className="max-w-md mx-auto min-h-screen px-4 sm:px-5 pt-8 pb-8">
+        <div className="relative min-h-[calc(100vh-64px)] rounded-[44px] sm:rounded-[56px] overflow-hidden bg-gradient-to-b from-violet-700 to-violet-900">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),transparent_55%)]" />
 
           {/* Stage 0: just purple card */}
@@ -256,7 +256,7 @@ export default function ThankYouClient() {
             }
           />
 
-          <div className="relative z-10 h-full px-6 pt-10 pb-10 flex flex-col items-center">
+          <div className="relative z-10 h-full px-5 sm:px-6 pt-8 sm:pt-10 pb-8 sm:pb-10 flex flex-col items-center">
             <div
               className={
                 stage >= 1
@@ -280,9 +280,9 @@ export default function ThankYouClient() {
                 </div>
               </div>
 
-              <div className="mt-6 text-center">
-                <div className="text-[40px] font-extrabold leading-[1.05] tracking-tight text-white">Thanks for reviewing!</div>
-                <div className="mt-2 text-xl font-medium text-white/70">Businesses grow with your insights.</div>
+              <div className="mt-5 text-center">
+                <div className="text-3xl sm:text-[40px] font-extrabold leading-[1.1] tracking-tight text-white">Thanks for reviewing!</div>
+                <div className="mt-2 text-base sm:text-xl font-medium text-white/70">Businesses grow with your insights.</div>
               </div>
             </div>
 
@@ -290,8 +290,8 @@ export default function ThankYouClient() {
             <div
               className={
                 stage >= 2
-                  ? 'mt-10 opacity-100 translate-y-0 transition-all duration-700'
-                  : 'mt-10 opacity-0 translate-y-4 transition-all duration-700'
+                  ? 'mt-8 sm:mt-10 opacity-100 translate-y-0 transition-all duration-700'
+                  : 'mt-8 sm:mt-10 opacity-0 translate-y-4 transition-all duration-700'
               }
             >
               <div className="flex items-center justify-center">
@@ -316,12 +316,12 @@ export default function ThankYouClient() {
               </div>
 
               {!scratched ? (
-                <div className="mt-6 text-center text-white/75 text-sm font-semibold">Scratch to reveal your coupon</div>
+                <div className="mt-5 text-center text-white/75 text-sm font-semibold">Scratch to reveal your coupon</div>
               ) : (
                 <>
-                  <div className="mt-8 flex items-center justify-center gap-3 text-white/70">
-                    <div className="text-lg">Coupon Code:</div>
-                    <div className="text-xl font-extrabold tracking-wide text-white">{couponCode}</div>
+                  <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-white/70">
+                    <div className="text-base sm:text-lg">Coupon Code:</div>
+                    <div className="text-lg sm:text-xl font-extrabold tracking-wide text-white break-all">{couponCode}</div>
                     <button
                       type="button"
                       onClick={handleCopy}
@@ -336,9 +336,9 @@ export default function ThankYouClient() {
               )}
             </div>
 
-            <div className="mt-auto pt-10 text-center text-white/70">
-              <div className="text-lg">Wants to rate anonymous?</div>
-              <Link href="/" className="text-lg underline text-white/85">
+            <div className="mt-auto pt-8 text-center text-white/70">
+              <div className="text-base sm:text-lg">Wants to rate anonymous?</div>
+              <Link href="/" className="text-base sm:text-lg underline text-white/85">
                 Please download our App
               </Link>
             </div>
@@ -349,8 +349,8 @@ export default function ThankYouClient() {
       <style jsx>{`
         .ty-burst {
           position: relative;
-          width: 72px;
-          height: 72px;
+          width: 64px;
+          height: 64px;
           display: grid;
           place-items: center;
           transform: scale(0.2);

@@ -231,7 +231,7 @@ export default function RateEmployeePage() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 px-5 pt-8 pb-28">
+        <div className="flex-1 px-5 pt-6 pb-24">
           {loading ? (
             <div className="text-sm text-gray-600 text-center">Loading…</div>
           ) : !employee ? (
@@ -256,8 +256,8 @@ export default function RateEmployeePage() {
           ) : (
             <>
               <div className="text-center">
-                <div className="text-3xl font-extrabold text-gray-900">{employee.name}</div>
-                <div className="mt-1 text-base text-gray-600">{employee.designation || '—'}</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-gray-900 break-words">{employee.name}</div>
+                <div className="mt-1 text-sm sm:text-base text-gray-600 break-words">{employee.designation || '—'}</div>
               </div>
 
               <div className="mt-8">
@@ -267,7 +267,7 @@ export default function RateEmployeePage() {
                   <div
                     ref={wheelRef}
                     onScroll={handleScroll}
-                    className="h-[320px] overflow-y-auto snap-y snap-mandatory [scrollbar-width:none]"
+                    className="h-[280px] sm:h-[320px] overflow-y-auto snap-y snap-mandatory [scrollbar-width:none]"
                     style={{ WebkitOverflowScrolling: 'touch' }}
                     aria-label="Select rating"
                   >
@@ -275,7 +275,7 @@ export default function RateEmployeePage() {
                     {RATINGS.map((r) => {
                       const dist = Math.abs(r - rating);
                       const { scale, opacity } = starStyle(dist);
-                      const size = r === rating ? 118 : 96;
+                      const size = r === rating ? 104 : 86;
 
                       return (
                         <div
@@ -307,7 +307,7 @@ export default function RateEmployeePage() {
                   </div>
                 </div>
 
-                <div className="mt-4 text-center text-sm font-semibold text-gray-800">{ratingLine}</div>
+                <div className="mt-4 text-center text-sm sm:text-base font-semibold text-gray-800">{ratingLine}</div>
               </div>
             </>
           )}
@@ -315,11 +315,11 @@ export default function RateEmployeePage() {
 
         {/* Bottom CTA */}
         <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur border-t border-gray-100">
-          <div className="max-w-md mx-auto p-5">
+          <div className="max-w-md mx-auto p-4">
             <Button
               onClick={handleNext}
               disabled={!employee || loading}
-              className="w-full bg-violet-700 hover:bg-violet-800 text-white py-4 rounded-2xl font-bold text-lg"
+              className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3.5 rounded-2xl font-bold text-base sm:text-lg"
             >
               Next
             </Button>

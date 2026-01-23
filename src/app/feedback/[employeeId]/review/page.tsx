@@ -407,20 +407,20 @@ export default function ReviewPage() {
         {/* Step 1: comments + questions */}
         {step === 'review' && (
           <>
-            <div className="flex-1 px-6 pb-28">
-              <div className="text-[44px] font-extrabold text-gray-900 leading-[1.05] tracking-tight">
+            <div className="flex-1 px-6 pb-24">
+              <div className="text-3xl sm:text-[40px] font-extrabold text-gray-900 leading-[1.1] tracking-tight">
                 Feel free to leave your
                 <br />
                 comments here
               </div>
 
-              <div className="mt-10 rounded-3xl border-2 border-gray-200 bg-white p-5">
+              <div className="mt-8 rounded-3xl border-2 border-gray-200 bg-white p-4 sm:p-5">
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="You can write a brief about the food"
                   className="w-full outline-none resize-none text-gray-900 text-base placeholder-gray-400"
-                  rows={7}
+                  rows={6}
                   aria-label="Comments"
                 />
               </div>
@@ -444,7 +444,7 @@ export default function ReviewPage() {
               ) : null}
 
               {questions.length ? (
-                <div className="mt-10 space-y-7">
+                <div className="mt-8 space-y-6">
                   {questions.map((q) => {
                     const value = answers[q.question] || 0;
                     return (
@@ -465,7 +465,7 @@ export default function ReviewPage() {
             </div>
 
             <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur border-t border-gray-100">
-              <div className="max-w-md mx-auto p-5">
+              <div className="max-w-md mx-auto p-4">
                 <Button
                   onClick={() => {
                     if (!canSubmitFeedback) return;
@@ -473,7 +473,7 @@ export default function ReviewPage() {
                     setStep('details');
                   }}
                   disabled={!canSubmitFeedback}
-                  className="w-full bg-violet-700 hover:bg-violet-800 text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-50"
+                  className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3.5 rounded-2xl font-bold text-base sm:text-lg disabled:opacity-50"
                 >
                   Submit
                 </Button>
@@ -485,47 +485,47 @@ export default function ReviewPage() {
         {/* Step 2: name + phone */}
         {step === 'details' && (
           <>
-            <div className="flex-1 px-6 pb-28">
-              <div className="text-[44px] font-extrabold text-gray-900 leading-[1.05] tracking-tight">
+            <div className="flex-1 px-6 pb-24">
+              <div className="text-3xl sm:text-[40px] font-extrabold text-gray-900 leading-[1.1] tracking-tight">
                 Feel free to leave your
                 <br />
                 comments here
               </div>
 
-              <div className="mt-8 text-lg text-gray-500">
+              <div className="mt-6 text-base sm:text-lg text-gray-500">
                 Share your feedback <span className="text-violet-700 font-semibold">&amp; Win discount coupon</span>
               </div>
 
               <div className="mt-10 relative">
                 <div className="absolute -inset-x-6 -bottom-24 h-64 bg-[radial-gradient(circle_at_bottom,rgba(167,139,250,0.35),transparent_60%)]" />
 
-                <div className="relative rounded-[44px] bg-white shadow-[0_18px_55px_rgba(167,139,250,0.25)] border border-violet-100 overflow-hidden">
-                  <div className="p-7">
+                <div className="relative rounded-[36px] bg-white shadow-[0_18px_55px_rgba(167,139,250,0.25)] border border-violet-100 overflow-hidden">
+                  <div className="p-5 sm:p-7">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-2xl bg-violet-700 flex items-center justify-center">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src="/stars/h_star.svg" alt="Star" className="w-7 h-7" draggable={false} />
                       </div>
-                      <div className="text-2xl font-extrabold text-gray-900 leading-tight">Your feedback makes a difference!</div>
+                      <div className="text-xl sm:text-2xl font-extrabold text-gray-900 leading-tight">Your feedback makes a difference!</div>
                     </div>
 
-                    <div className="mt-10 space-y-6">
+                    <div className="mt-8 space-y-5">
                       <Input
                         type="text"
                         placeholder="Enter you Name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-7 py-5 bg-white border-2 border-violet-700/70 rounded-full focus:border-violet-800 focus:ring-2 focus:ring-violet-500/15 transition-all text-gray-900 text-lg placeholder-gray-300"
+                        className="w-full px-6 py-4 bg-white border-2 border-violet-700/70 rounded-full focus:border-violet-800 focus:ring-2 focus:ring-violet-500/15 transition-all text-gray-900 text-base sm:text-lg placeholder-gray-300"
                       />
 
                       <div className="relative">
-                        <div className="absolute left-7 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-lg">+91</div>
+                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-base sm:text-lg">+91</div>
                         <Input
                           type="tel"
                           placeholder="Enter your phone Number"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
-                          className="w-full pl-20 pr-7 py-5 bg-white border-2 border-violet-700/70 rounded-full focus:border-violet-800 focus:ring-2 focus:ring-violet-500/15 transition-all text-gray-900 text-lg placeholder-gray-300"
+                          className="w-full pl-16 pr-6 py-4 bg-white border-2 border-violet-700/70 rounded-full focus:border-violet-800 focus:ring-2 focus:ring-violet-500/15 transition-all text-gray-900 text-base sm:text-lg placeholder-gray-300"
                         />
                       </div>
                     </div>
@@ -537,11 +537,11 @@ export default function ReviewPage() {
             </div>
 
             <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur border-t border-gray-100">
-              <div className="max-w-md mx-auto p-5">
+              <div className="max-w-md mx-auto p-4">
                 <Button
                   onClick={submitDetails}
                   disabled={!name.trim() || !phone.trim() || submitting}
-                  className="w-full bg-violet-700 hover:bg-violet-800 text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-50"
+                  className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3.5 rounded-2xl font-bold text-base sm:text-lg disabled:opacity-50"
                 >
                   {submitting ? 'Submitting…' : 'Continue'}
                 </Button>
@@ -553,16 +553,16 @@ export default function ReviewPage() {
         {/* Step 3: OTP */}
         {step === 'otp' && (
           <>
-            <div className="flex-1 px-6 pb-28">
-              <div className="text-[56px] font-extrabold text-gray-900 leading-[0.95] tracking-tight">
+            <div className="flex-1 px-6 pb-24">
+              <div className="text-[40px] sm:text-[56px] font-extrabold text-gray-900 leading-[1] tracking-tight">
                 OTP
                 <br />
                 Verification
               </div>
 
-              <div className="mt-8 text-lg text-gray-600">OTP has been sent to {normalizeIndianPhone(phone)}</div>
+              <div className="mt-6 text-base sm:text-lg text-gray-600">OTP has been sent to {normalizeIndianPhone(phone)}</div>
 
-              <div className="mt-14 flex items-center justify-center gap-5">
+              <div className="mt-10 flex items-center justify-center gap-3 sm:gap-5">
                 {[0, 1, 2, 3].map((idx) => (
                   <input
                     key={idx}
@@ -573,7 +573,7 @@ export default function ReviewPage() {
                     value={otpDigits[idx]}
                     onChange={(e) => setOtpAt(idx, e.target.value)}
                     onKeyDown={(e) => onOtpKeyDown(idx, e)}
-                    className="w-20 h-20 rounded-3xl border-[3px] border-violet-700/70 text-center text-3xl font-extrabold text-gray-900 outline-none focus:border-violet-900 focus:ring-2 focus:ring-violet-500/15"
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl border-[3px] border-violet-700/70 text-center text-2xl sm:text-3xl font-extrabold text-gray-900 outline-none focus:border-violet-900 focus:ring-2 focus:ring-violet-500/15"
                     aria-label={`OTP digit ${idx + 1}`}
                   />
                 ))}
@@ -583,11 +583,11 @@ export default function ReviewPage() {
             </div>
 
             <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur border-t border-gray-100">
-              <div className="max-w-md mx-auto p-5">
+              <div className="max-w-md mx-auto p-4">
                 <Button
                   onClick={submitOtp}
                   disabled={verifying || otp.trim().length !== 4 || !reviewId}
-                  className="w-full bg-violet-700 hover:bg-violet-800 text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-50"
+                  className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3.5 rounded-2xl font-bold text-base sm:text-lg disabled:opacity-50"
                 >
                   {verifying ? 'Verifying…' : 'Submit'}
                 </Button>

@@ -53,9 +53,11 @@ export async function graphqlRequest<TData, TVariables extends Record<string, un
   query: string,
   variables?: TVariables,
   operationName?: string,
+  options?: { authToken?: string },
 ): Promise<TData> {
   const endpoint = resolveGraphqlEndpoint();
   const body = JSON.stringify({ query, variables, operationName });
+  const authToken = options?.authToken;
 
   const doFetch = () =>
     fetch(endpoint, {
@@ -63,6 +65,7 @@ export async function graphqlRequest<TData, TVariables extends Record<string, un
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
       },
       body,
     });

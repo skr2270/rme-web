@@ -109,12 +109,12 @@ export default function AdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-6">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md text-center">
         <div className="text-3xl font-extrabold text-gray-900">Super Admin Login</div>
         <div className="mt-2 text-gray-500">Login using your mobile number and OTP.</div>
 
         {step === 'phone' && (
-          <div className="mt-8 space-y-4">
+          <div className="mt-8 space-y-4 text-left">
             <div className="relative">
               <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">+91</div>
               <Input
@@ -138,7 +138,7 @@ export default function AdminLoginPage() {
         )}
 
         {step === 'otp' && (
-          <div className="mt-8 space-y-6 text-center">
+          <div className="mt-8 space-y-6">
             <div className="text-gray-600">OTP sent to {normalizedPhone}</div>
             <div className="flex items-center justify-center gap-3">
               {[0, 1, 2, 3].map((idx) => (
@@ -149,7 +149,7 @@ export default function AdminLoginPage() {
                   inputMode="numeric"
                   value={otpDigits[idx]}
                   onChange={(e) => setOtpAt(idx, e.target.value)}
-                  className="w-14 h-14 rounded-2xl border-2 border-violet-300 text-center text-2xl font-bold"
+                  className="w-14 h-14 rounded-2xl border-2 border-violet-300 text-center text-2xl font-bold outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
                   aria-label={`OTP digit ${idx + 1}`}
                 />
               ))}

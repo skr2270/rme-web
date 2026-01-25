@@ -35,8 +35,8 @@ export function DashboardShell({ title, subtitle, logoSrc, logoAlt = 'RME', acti
         {alerts ? <div className="mt-4 space-y-2">{alerts}</div> : null}
       </div>
 
-      <div className="flex gap-6 pt-6 px-6">
-        <aside className="hidden lg:flex lg:flex-col lg:sticky lg:top-[var(--dashboard-header-height)] lg:w-[240px] self-start bg-white border-r border-gray-200 px-4 py-5">
+      <div className="flex gap-6 pt-6 px-6 min-h-[calc(100vh-var(--dashboard-header-height))] items-stretch">
+        <aside className="hidden lg:flex lg:flex-col lg:sticky lg:top-[var(--dashboard-header-height)] lg:w-[240px] self-stretch h-full min-h-[calc(100vh-var(--dashboard-header-height)-24px)] bg-white border-r border-gray-200 px-4 py-5">
           {sidebar}
         </aside>
 

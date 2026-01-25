@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import JSZip from 'jszip';
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
+import { SidebarNav } from '@/components/molecules/SidebarNav';
+import { DashboardShell } from '@/components/organisms/DashboardShell';
 import { graphqlRequest } from '@/lib/graphql';
 import { clearAdminToken, getAdminRole, getAdminToken } from '@/lib/adminAuth';
 
@@ -238,188 +240,164 @@ export default function AdminDashboardPage() {
   }, [batch]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="w-full">
-        <div className="sticky top-0 z-40 bg-slate-50/90 backdrop-blur border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-            <div>
-              <div className="text-3xl font-extrabold text-gray-900">Super Admin Portal</div>
-              <div className="text-gray-500">Manage agents and QR code batches.</div>
-            </div>
-            <Button onClick={handleLogout} className="bg-white px-4 py-2 rounded-xl border border-gray-200">
-              Logout
-            </Button>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6">
-          {error ? <div className="mt-4 text-sm text-red-600">{error}</div> : null}
-        </div>
-
-        <div className="mt-6 flex gap-6">
-          <aside className="hidden lg:flex lg:flex-col lg:fixed lg:top-[88px] lg:left-6 lg:w-[240px] lg:h-[calc(100vh-88px)] rounded-3xl bg-white border border-gray-200 p-4 shadow-sm">
-            <div className="text-xs font-semibold text-gray-500 px-3">NAVIGATION</div>
-            <div className="mt-4 space-y-2">
-              <button
-                type="button"
-                onClick={() => setActiveSection('agents')}
-                className={
-                  activeSection === 'agents'
-                    ? 'w-full text-left px-4 py-3 rounded-2xl bg-violet-600 text-white font-semibold flex items-center gap-2'
-                    : 'w-full text-left px-4 py-3 rounded-2xl text-gray-700 hover:bg-gray-100 flex items-center gap-2'
-                }
-              >
-                <IconUsers />
-                Manage Agents
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveSection('qrcodes')}
-                className={
-                  activeSection === 'qrcodes'
-                    ? 'w-full text-left px-4 py-3 rounded-2xl bg-violet-600 text-white font-semibold flex items-center gap-2'
-                    : 'w-full text-left px-4 py-3 rounded-2xl text-gray-700 hover:bg-gray-100 flex items-center gap-2'
-                }
-              >
-                <IconQr />
-                Generate QR Codes
-              </button>
-            </div>
-          </aside>
-
-          <div className="w-full lg:pl-[280px]">
-            <section className="min-h-[480px]">
-            {activeSection === 'agents' && (
-              <div className="rounded-3xl bg-white border border-gray-200 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-xl font-bold text-gray-900">Manage Agents</div>
-                    <div className="text-sm text-gray-500">Create and deactivate agent logins.</div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Button
-                      onClick={loadAgents}
-                      className="bg-gray-100 px-4 py-2 rounded-xl"
-                    >
-                      Refresh
-                    </Button>
-                    <Button
-                      onClick={() => setShowAddAgent(true)}
-                      className="bg-violet-700 hover:bg-violet-800 text-white px-4 py-2 rounded-xl"
-                    >
-                      Add Agent
-                    </Button>
-                  </div>
+    <>
+      <DashboardShell
+        title="Super Admin Portal"
+        subtitle="Manage agents and QR code batches."
+        actions={
+          <Button onClick={handleLogout} className="bg-white px-4 py-2 rounded-xl border border-gray-200">
+            Logout
+          </Button>
+        }
+        alerts={error ? <div className="text-sm text-red-600">{error}</div> : null}
+        sidebar={
+          <SidebarNav
+            items={[
+              {
+                id: 'agents',
+                label: 'Manage Agents',
+                icon: <IconUsers />,
+                active: activeSection === 'agents',
+                onClick: () => setActiveSection('agents'),
+              },
+              {
+                id: 'qrcodes',
+                label: 'Generate QR Codes',
+                icon: <IconQr />,
+                active: activeSection === 'qrcodes',
+                onClick: () => setActiveSection('qrcodes'),
+              },
+            ]}
+          />
+        }
+      >
+        <section className="min-h-[480px] space-y-6">
+          {activeSection === 'agents' && (
+            <div className="rounded-3xl bg-white border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-xl font-bold text-gray-900">Manage Agents</div>
+                  <div className="text-sm text-gray-500">Create and deactivate agent logins.</div>
                 </div>
-
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <Input
-                    type="text"
-                    placeholder="Search by name, phone, or email"
-                    value={agentSearch}
-                    onChange={(e) => setAgentSearch(e.target.value)}
-                    className="flex-1 min-w-[240px] px-4 py-3 border-2 border-violet-100 rounded-2xl"
-                  />
-                  <select
-                    value={agentFilter}
-                    onChange={(e) => setAgentFilter(e.target.value as 'all' | 'active')}
-                    className="px-4 py-3 rounded-2xl border border-violet-100 bg-white text-sm"
-                  >
-                    <option value="active">Active</option>
-                    <option value="all">All</option>
-                  </select>
-                </div>
-
-                <div className="mt-6 rounded-2xl border border-gray-100 overflow-hidden">
-                  <div className="grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-gray-50 text-xs font-semibold text-gray-500">
-                    <div>Name</div>
-                    <div>Mobile</div>
-                    <div>Email</div>
-                    <div className="text-right">Action</div>
-                  </div>
-                  <div className="divide-y divide-gray-100">
-                    {loadingAgents ? (
-                      <div className="px-5 py-6 text-sm text-gray-500">Loading agents…</div>
-                    ) : filteredAgents.length === 0 ? (
-                      <div className="px-5 py-6 text-sm text-gray-500">No agents created yet.</div>
-                    ) : (
-                      filteredAgents.map((agent) => (
-                        <div key={agent.id} className="grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 px-5 py-4 text-sm text-gray-700">
-                          <div className="font-semibold text-gray-900 flex items-center gap-2">
-                            {agent.name || '—'}
-                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
-                              Active
-                            </span>
-                          </div>
-                          <div>{agent.phoneNumber}</div>
-                          <div className="truncate">{agent.email || '—'}</div>
-                          <div className="text-right">
-                            <Button
-                              onClick={() => deactivateAgent(agent.id)}
-                              className="bg-red-50 text-red-600 px-3 py-2 rounded-xl"
-                            >
-                              Deactivate
-                            </Button>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeSection === 'qrcodes' && (
-              <div className="rounded-3xl bg-white border border-gray-200 p-6">
-                <div className="text-xl font-bold text-gray-900">Generate QR Codes</div>
-                <div className="text-sm text-gray-500">Create batch QR codes and download as ZIP.</div>
-
-                <div className="mt-6 grid gap-4 md:grid-cols-[1fr_auto]">
-                  <Input
-                    type="number"
-                    placeholder="Count"
-                    value={String(batchCount)}
-                    onChange={(e) => setBatchCount(Number(e.target.value))}
-                    className="w-full px-4 py-3 border-2 border-violet-100 rounded-2xl"
-                  />
+                <div className="flex items-center gap-3">
+                  <Button onClick={loadAgents} className="bg-gray-100 px-4 py-2 rounded-xl">
+                    Refresh
+                  </Button>
                   <Button
-                    onClick={generateBatch}
-                    disabled={batchLoading || batchCount <= 0}
-                    className="bg-violet-700 hover:bg-violet-800 text-white px-6 py-3 rounded-2xl font-bold"
+                    onClick={() => setShowAddAgent(true)}
+                    className="bg-violet-700 hover:bg-violet-800 text-white px-4 py-2 rounded-xl"
                   >
-                    {batchLoading ? 'Generating…' : 'Generate Batch'}
+                    Add Agent
                   </Button>
                 </div>
-
-                {batch ? (
-                  <div className="mt-6">
-                    <div className="text-sm font-semibold text-gray-700">{batchLabel}</div>
-                    <div className="mt-3 flex flex-wrap items-center gap-3">
-                      <Button onClick={downloadZip} className="bg-gray-900 text-white px-4 py-2 rounded-xl">
-                        Download ZIP
-                      </Button>
-                      <div className="text-sm text-gray-500">{batch.items.length} QR codes</div>
-                    </div>
-                  </div>
-                ) : null}
-
-                {batch?.items?.length ? (
-                  <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {batch.items.map((item) => (
-                      <div key={item.qrCode.id} className="rounded-2xl border border-gray-100 p-4">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={item.dataUrl} alt={item.qrCode.code} className="w-full" />
-                        <div className="mt-2 text-xs text-gray-700 break-all">{item.qrCode.code}</div>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
               </div>
-            )}
-            </section>
-          </div>
-        </div>
-      </div>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Input
+                  type="text"
+                  placeholder="Search by name, phone, or email"
+                  value={agentSearch}
+                  onChange={(e) => setAgentSearch(e.target.value)}
+                  className="flex-1 min-w-[240px] px-4 py-3 border-2 border-violet-100 rounded-2xl"
+                />
+                <select
+                  value={agentFilter}
+                  onChange={(e) => setAgentFilter(e.target.value as 'all' | 'active')}
+                  className="px-4 py-3 rounded-2xl border border-violet-100 bg-white text-sm"
+                >
+                  <option value="active">Active</option>
+                  <option value="all">All</option>
+                </select>
+              </div>
+
+              <div className="mt-6 rounded-2xl border border-gray-100 overflow-hidden">
+                <div className="grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-gray-50 text-xs font-semibold text-gray-500">
+                  <div>Name</div>
+                  <div>Mobile</div>
+                  <div>Email</div>
+                  <div className="text-right">Action</div>
+                </div>
+                <div className="divide-y divide-gray-100">
+                  {loadingAgents ? (
+                    <div className="px-5 py-6 text-sm text-gray-500">Loading agents…</div>
+                  ) : filteredAgents.length === 0 ? (
+                    <div className="px-5 py-6 text-sm text-gray-500">No agents created yet.</div>
+                  ) : (
+                    filteredAgents.map((agent) => (
+                      <div key={agent.id} className="grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 px-5 py-4 text-sm text-gray-700">
+                        <div className="font-semibold text-gray-900 flex items-center gap-2">
+                          {agent.name || '—'}
+                          <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                            Active
+                          </span>
+                        </div>
+                        <div>{agent.phoneNumber}</div>
+                        <div className="truncate">{agent.email || '—'}</div>
+                        <div className="text-right">
+                          <Button
+                            onClick={() => deactivateAgent(agent.id)}
+                            className="bg-red-50 text-red-600 px-3 py-2 rounded-xl"
+                          >
+                            Deactivate
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'qrcodes' && (
+            <div className="rounded-3xl bg-white border border-gray-200 p-6">
+              <div className="text-xl font-bold text-gray-900">Generate QR Codes</div>
+              <div className="text-sm text-gray-500">Create batch QR codes and download as ZIP.</div>
+
+              <div className="mt-6 grid gap-4 md:grid-cols-[1fr_auto]">
+                <Input
+                  type="number"
+                  placeholder="Count"
+                  value={String(batchCount)}
+                  onChange={(e) => setBatchCount(Number(e.target.value))}
+                  className="w-full px-4 py-3 border-2 border-violet-100 rounded-2xl"
+                />
+                <Button
+                  onClick={generateBatch}
+                  disabled={batchLoading || batchCount <= 0}
+                  className="bg-violet-700 hover:bg-violet-800 text-white px-6 py-3 rounded-2xl font-bold"
+                >
+                  {batchLoading ? 'Generating…' : 'Generate Batch'}
+                </Button>
+              </div>
+
+              {batch ? (
+                <div className="mt-6">
+                  <div className="text-sm font-semibold text-gray-700">{batchLabel}</div>
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <Button onClick={downloadZip} className="bg-gray-900 text-white px-4 py-2 rounded-xl">
+                      Download ZIP
+                    </Button>
+                    <div className="text-sm text-gray-500">{batch.items.length} QR codes</div>
+                  </div>
+                </div>
+              ) : null}
+
+              {batch?.items?.length ? (
+                <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {batch.items.map((item) => (
+                    <div key={item.qrCode.id} className="rounded-2xl border border-gray-100 p-4">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={item.dataUrl} alt={item.qrCode.code} className="w-full" />
+                      <div className="mt-2 text-xs text-gray-700 break-all">{item.qrCode.code}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          )}
+        </section>
+      </DashboardShell>
 
       {showAddAgent ? (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-6">
@@ -456,10 +434,7 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-3">
-              <Button
-                onClick={() => setShowAddAgent(false)}
-                className="bg-gray-100 px-4 py-2 rounded-xl"
-              >
+              <Button onClick={() => setShowAddAgent(false)} className="bg-gray-100 px-4 py-2 rounded-xl">
                 Cancel
               </Button>
               <Button
@@ -473,6 +448,6 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       ) : null}
-    </div>
+    </>
   );
 }

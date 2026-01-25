@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
+import { SidebarNav } from '@/components/molecules/SidebarNav';
+import { DashboardShell } from '@/components/organisms/DashboardShell';
 import { graphqlRequest } from '@/lib/graphql';
 import { clearAdminToken, getAdminRole, getAdminToken } from '@/lib/adminAuth';
 
@@ -34,6 +36,7 @@ export default function AgentDashboardPage() {
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<'assign'>('assign');
 
   const [qrCodes, setQrCodes] = useState<UnassignedQr[]>([]);
   const [selectedQr, setSelectedQr] = useState<string>('');
@@ -276,21 +279,55 @@ export default function AgentDashboardPage() {
     if (digit && idx < 3) otpRefs[idx + 1].current?.focus();
   };
 
+  const IconAssign = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M5 7h10M5 12h10M5 17h6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M17 16l2 2 4-4"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-3xl font-extrabold text-gray-900">Agent Dashboard</div>
-            <div className="text-gray-500">Assign QR codes to onboard businesses.</div>
-          </div>
-          <Button onClick={handleLogout} className="bg-gray-100 px-4 py-2 rounded-xl">Logout</Button>
-        </div>
-
-        {error ? <div className="mt-4 text-sm text-red-600">{error}</div> : null}
-        {successMessage ? <div className="mt-4 text-sm text-green-600">{successMessage}</div> : null}
-
-        <div className="mt-8 rounded-3xl border border-gray-200 p-6">
+    <DashboardShell
+      title="Agent Dashboard"
+      subtitle="Assign QR codes to onboard businesses."
+      actions={
+        <Button onClick={handleLogout} className="bg-white px-4 py-2 rounded-xl border border-gray-200">
+          Logout
+        </Button>
+      }
+      alerts={
+        <>
+          {error ? <div className="text-sm text-red-600">{error}</div> : null}
+          {successMessage ? <div className="text-sm text-green-600">{successMessage}</div> : null}
+        </>
+      }
+      sidebar={
+        <SidebarNav
+          items={[
+            {
+              id: 'assign',
+              label: 'Assign QR Codes',
+              icon: <IconAssign />,
+              active: activeSection === 'assign',
+              onClick: () => setActiveSection('assign'),
+            },
+          ]}
+        />
+      }
+    >
+      <section className="space-y-6">
+        <div className="rounded-3xl bg-white border border-gray-200 p-6">
           <div className="text-lg font-bold text-gray-900">Step 1: Select Unassigned QR</div>
           <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
             <select
@@ -308,8 +345,8 @@ export default function AgentDashboardPage() {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl border border-gray-200 p-6">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-3xl bg-white border border-gray-200 p-6">
             <div className="text-lg font-bold text-gray-900">Step 2: Verify GSTIN</div>
             <div className="mt-4 space-y-4">
               <Input
@@ -329,7 +366,7 @@ export default function AgentDashboardPage() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-gray-200 p-6">
+          <div className="rounded-3xl bg-white border border-gray-200 p-6">
             <div className="text-lg font-bold text-gray-900">Step 3: Business Details</div>
             <div className="mt-4 space-y-4">
               <Input
@@ -376,7 +413,7 @@ export default function AgentDashboardPage() {
           </div>
         </div>
 
-        <div className="mt-8 rounded-3xl border border-gray-200 p-6">
+        <div className="rounded-3xl bg-white border border-gray-200 p-6">
           <div className="text-lg font-bold text-gray-900">Step 4: Verify OTP & Assign</div>
           <div className="mt-4 flex items-center justify-center gap-3">
             {[0, 1, 2, 3].map((idx) => (
@@ -402,7 +439,7 @@ export default function AgentDashboardPage() {
             </Button>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </DashboardShell>
   );
 }

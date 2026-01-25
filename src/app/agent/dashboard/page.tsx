@@ -301,8 +301,10 @@ export default function AgentDashboardPage() {
     <DashboardShell
       title="Agent Dashboard"
       subtitle="Assign QR codes to onboard businesses."
+      logoSrc="/RME3.png"
+      logoAlt="RME"
       actions={
-        <Button onClick={handleLogout} className="bg-white px-4 py-2 rounded-xl border border-gray-200">
+        <Button onClick={handleLogout} className="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-xl">
           Logout
         </Button>
       }
@@ -341,7 +343,7 @@ export default function AgentDashboardPage() {
                 </option>
               ))}
             </select>
-            <Button onClick={fetchUnassigned} className="bg-gray-100 px-4 py-3 rounded-2xl">Refresh</Button>
+            <Button onClick={fetchUnassigned} className="bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-2xl">Refresh</Button>
           </div>
         </div>
 

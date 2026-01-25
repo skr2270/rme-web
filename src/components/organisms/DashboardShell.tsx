@@ -1,37 +1,46 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 type DashboardShellProps = {
   title: string;
   subtitle?: string;
+  logoSrc?: string;
+  logoAlt?: string;
   actions?: ReactNode;
   alerts?: ReactNode;
   sidebar: ReactNode;
   children: ReactNode;
 };
 
-export function DashboardShell({ title, subtitle, actions, alerts, sidebar, children }: DashboardShellProps) {
+export function DashboardShell({ title, subtitle, logoSrc, logoAlt = 'RME', actions, alerts, sidebar, children }: DashboardShellProps) {
+  const headerHeight = '72px';
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50" style={{ '--dashboard-header-height': headerHeight } as CSSProperties}>
       <div className="sticky top-0 z-40 bg-slate-50/90 backdrop-blur border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between gap-4">
-          <div>
+        <div className="w-full px-6 h-[var(--dashboard-header-height)] grid grid-cols-[240px_1fr_auto] items-center gap-4">
+          <div className="flex items-center">
+            {logoSrc ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logoSrc} alt={logoAlt} className="h-8 sm:h-9 w-auto" />
+            ) : null}
+          </div>
+          <div className="max-w-5xl mx-auto">
             <div className="text-2xl sm:text-3xl font-extrabold text-gray-900">{title}</div>
             {subtitle ? <div className="text-gray-500">{subtitle}</div> : null}
           </div>
-          <div className="flex items-center gap-3">{actions}</div>
+          <div className="flex items-center justify-end gap-3">{actions}</div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="w-full px-6">
         {alerts ? <div className="mt-4 space-y-2">{alerts}</div> : null}
       </div>
 
-      <div className="mt-6 flex gap-6">
-        <aside className="hidden lg:flex lg:flex-col lg:fixed lg:top-[76px] lg:left-6 lg:w-[240px] lg:h-[calc(100vh-76px)] rounded-3xl bg-white border border-gray-200 p-4 shadow-sm">
+      <div className="flex gap-6 pt-6 px-6">
+        <aside className="hidden lg:flex lg:flex-col lg:sticky lg:top-[var(--dashboard-header-height)] lg:w-[240px] self-start bg-white border-r border-gray-200 px-4 py-5">
           {sidebar}
         </aside>
 
-        <main className="w-full lg:pl-[280px] pb-10">
+        <main className="w-full pb-10">
           <div className="lg:hidden mb-6 rounded-3xl bg-white border border-gray-200 p-4 shadow-sm">
             {sidebar}
           </div>

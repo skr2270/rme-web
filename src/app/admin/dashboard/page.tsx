@@ -244,8 +244,10 @@ export default function AdminDashboardPage() {
       <DashboardShell
         title="Super Admin Portal"
         subtitle="Manage agents and QR code batches."
+        logoSrc="/RME3.png"
+        logoAlt="RME"
         actions={
-          <Button onClick={handleLogout} className="bg-white px-4 py-2 rounded-xl border border-gray-200">
+          <Button onClick={handleLogout} className="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-xl">
             Logout
           </Button>
         }
@@ -280,7 +282,7 @@ export default function AdminDashboardPage() {
                   <div className="text-sm text-gray-500">Create and deactivate agent logins.</div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Button onClick={loadAgents} className="bg-gray-100 px-4 py-2 rounded-xl">
+                  <Button onClick={loadAgents} className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl">
                     Refresh
                   </Button>
                   <Button
@@ -292,26 +294,28 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Input
-                  type="text"
-                  placeholder="Search by name, phone, or email"
-                  value={agentSearch}
-                  onChange={(e) => setAgentSearch(e.target.value)}
-                  className="flex-1 min-w-[240px] px-4 py-3 border-2 border-violet-100 rounded-2xl"
-                />
-                <select
-                  value={agentFilter}
-                  onChange={(e) => setAgentFilter(e.target.value as 'all' | 'active')}
-                  className="px-4 py-3 rounded-2xl border border-violet-100 bg-white text-sm"
-                >
-                  <option value="active">Active</option>
-                  <option value="all">All</option>
-                </select>
+              <div className="mt-6 rounded-2xl bg-gray-50/70 border border-gray-100 p-3">
+                <div className="flex flex-wrap gap-3">
+                  <Input
+                    type="text"
+                    placeholder="Search by name, phone, or email"
+                    value={agentSearch}
+                    onChange={(e) => setAgentSearch(e.target.value)}
+                    className="flex-1 min-w-[240px] px-4 py-3 border border-gray-200 rounded-2xl bg-white"
+                  />
+                  <select
+                    value={agentFilter}
+                    onChange={(e) => setAgentFilter(e.target.value as 'all' | 'active')}
+                    className="px-4 py-3 rounded-2xl border border-gray-200 bg-white text-sm"
+                  >
+                    <option value="active">Active</option>
+                    <option value="all">All</option>
+                  </select>
+                </div>
               </div>
 
               <div className="mt-6 rounded-2xl border border-gray-100 overflow-hidden">
-                <div className="grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-gray-50 text-xs font-semibold text-gray-500">
+                <div className="grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-gray-100 text-xs font-semibold text-gray-600">
                   <div>Name</div>
                   <div>Mobile</div>
                   <div>Email</div>
@@ -319,9 +323,9 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="divide-y divide-gray-100">
                   {loadingAgents ? (
-                    <div className="px-5 py-6 text-sm text-gray-500">Loading agents…</div>
+                    <div className="px-5 py-8 text-sm text-gray-600">Loading agents…</div>
                   ) : filteredAgents.length === 0 ? (
-                    <div className="px-5 py-6 text-sm text-gray-500">No agents created yet.</div>
+                    <div className="px-5 py-8 text-sm text-gray-600">No agents created yet.</div>
                   ) : (
                     filteredAgents.map((agent) => (
                       <div key={agent.id} className="grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 px-5 py-4 text-sm text-gray-700">

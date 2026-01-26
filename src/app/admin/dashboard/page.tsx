@@ -56,6 +56,7 @@ const IconQr = () => (
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<SectionKey>('agents');
 
@@ -98,9 +99,11 @@ export default function AdminDashboardPage() {
     const t = getAdminToken();
     if (!t || role !== 'SUPER_ADMIN') {
       router.replace('/admin/login');
+      setAuthChecked(true);
       return;
     }
     setToken(t);
+    setAuthChecked(true);
   }, [router]);
 
   const handleLogout = () => {
@@ -238,6 +241,10 @@ export default function AdminDashboardPage() {
     if (!batch) return null;
     return `Batch ${batch.batchMonth}-${String(batch.batchNumber).padStart(3, '0')}`;
   }, [batch]);
+
+  if (!authChecked || !token) {
+    return <div className="min-h-screen bg-slate-50" />;
+  }
 
   return (
     <>

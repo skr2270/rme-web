@@ -34,6 +34,7 @@ type GstinResponse = {
 export default function AgentDashboardPage() {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'assign'>('assign');
@@ -68,9 +69,11 @@ export default function AgentDashboardPage() {
     const t = getAdminToken();
     if (!t || role !== 'AGENT') {
       router.replace('/agent/login');
+      setAuthChecked(true);
       return;
     }
     setToken(t);
+    setAuthChecked(true);
   }, [router]);
 
   useEffect(() => {
@@ -278,6 +281,10 @@ export default function AgentDashboardPage() {
     });
     if (digit && idx < 3) otpRefs[idx + 1].current?.focus();
   };
+
+  if (!authChecked || !token) {
+    return <div className="min-h-screen bg-slate-50" />;
+  }
 
   const IconAssign = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">

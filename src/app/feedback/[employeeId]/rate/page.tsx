@@ -28,7 +28,6 @@ type RatingTextRow = {
 };
 
 const RATINGS = Array.from({ length: 10 }, (_, i) => i + 1);
-const ITEM_HEIGHT = 74;
 
 function clamp(n: number, min: number, max: number) {
   return Math.min(max, Math.max(min, n));
@@ -59,6 +58,9 @@ export default function RateEmployeePage() {
   const [businessProfile, setBusinessProfile] = useState<PublicBusinessProfile | null>(null);
   const [ratingTexts, setRatingTexts] = useState<Record<number, string>>({});
   const [rating, setRating] = useState<number>(8);
+  const [itemHeight, setItemHeight] = useState(72);
+  const [starSizes, setStarSizes] = useState({ active: 96, inactive: 78 });
+  const scrollTickRef = useRef<number | null>(null);
   const initialRatingRef = useRef<number>(rating);
 
   const businessId = businessIdFromRoute || employee?.business_id || null;
@@ -169,11 +171,27 @@ export default function RateEmployeePage() {
   }, [categoryId]);
 
   useEffect(() => {
+    const syncSizes = () => {
+      const width = typeof window !== 'undefined' ? window.innerWidth : 420;
+      if (width <= 380) {
+        setItemHeight(64);
+        setStarSizes({ active: 84, inactive: 68 });
+      } else {
+        setItemHeight(72);
+        setStarSizes({ active: 96, inactive: 78 });
+      }
+    };
+    syncSizes();
+    window.addEventListener('resize', syncSizes);
+    return () => window.removeEventListener('resize', syncSizes);
+  }, []);
+
+  useEffect(() => {
     const el = wheelRef.current;
     if (!el) return;
-    const top = (initialRatingRef.current - 1) * ITEM_HEIGHT;
+    const top = (initialRatingRef.current - 1) * itemHeight;
     el.scrollTo({ top });
-  }, []);
+  }, [itemHeight]);
 
   const ratingLine = useMemo(() => {
     const text = ratingTexts[rating];
@@ -184,9 +202,13 @@ export default function RateEmployeePage() {
   const handleScroll = () => {
     const el = wheelRef.current;
     if (!el) return;
-    const idx = Math.round(el.scrollTop / ITEM_HEIGHT);
-    const value = clamp(idx + 1, 1, 10);
-    setRating(value);
+    if (scrollTickRef.current) return;
+    scrollTickRef.current = window.requestAnimationFrame(() => {
+      scrollTickRef.current = null;
+      const idx = Math.round(el.scrollTop / itemHeight);
+      const value = clamp(idx + 1, 1, 10);
+      setRating(value);
+    });
   };
 
   const handleNext = () => {
@@ -205,7 +227,7 @@ export default function RateEmployeePage() {
       <div className="max-w-md mx-auto min-h-screen flex flex-col">
         {/* Top hero */}
         <div className="relative">
-          <div className="h-72 bg-gradient-to-b from-violet-700 to-violet-900 overflow-hidden">
+          <div className="h-60 sm:h-72 bg-gradient-to-b from-violet-700 to-violet-900 overflow-hidden">
             {employee?.photoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={employee.photoUrl} alt={employee.name} className="w-full h-full object-cover opacity-95" />
@@ -267,21 +289,21 @@ export default function RateEmployeePage() {
                   <div
                     ref={wheelRef}
                     onScroll={handleScroll}
-                    className="h-[280px] sm:h-[320px] overflow-y-auto snap-y snap-mandatory [scrollbar-width:none]"
+                    className="h-[240px] sm:h-[320px] overflow-y-auto snap-y snap-mandatory overscroll-contain [scroll-snap-stop:always] [scrollbar-width:none]"
                     style={{ WebkitOverflowScrolling: 'touch' }}
                     aria-label="Select rating"
                   >
-                    <div style={{ height: ITEM_HEIGHT * 2 }} />
+                    <div style={{ height: itemHeight * 2 }} />
                     {RATINGS.map((r) => {
                       const dist = Math.abs(r - rating);
                       const { scale, opacity } = starStyle(dist);
-                      const size = r === rating ? 104 : 86;
+                      const size = r === rating ? starSizes.active : starSizes.inactive;
 
                       return (
                         <div
                           key={r}
                           className="snap-center flex items-center justify-center"
-                          style={{ height: ITEM_HEIGHT }}
+                          style={{ height: itemHeight }}
                         >
                           <div
                             className="transition-all duration-200"
@@ -303,11 +325,11 @@ export default function RateEmployeePage() {
                         </div>
                       );
                     })}
-                    <div style={{ height: ITEM_HEIGHT * 2 }} />
+                    <div style={{ height: itemHeight * 2 }} />
                   </div>
                 </div>
 
-                <div className="mt-4 text-center text-sm sm:text-base font-semibold text-gray-800">{ratingLine}</div>
+                <div className="mt-3 text-center text-sm sm:text-base font-semibold text-gray-800">{ratingLine}</div>
               </div>
             </>
           )}

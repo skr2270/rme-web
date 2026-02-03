@@ -69,14 +69,14 @@ function ScratchCard({
 
     // Base scratch layer
     const grad = ctx.createLinearGradient(0, 0, w, h);
-    grad.addColorStop(0, 'rgba(255,255,255,0.35)');
-    grad.addColorStop(1, 'rgba(0,0,0,0.18)');
+    grad.addColorStop(0, 'rgba(255,255,255,0.7)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.28)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
     // Stripe texture
-    ctx.globalAlpha = 0.5;
-    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.globalAlpha = 0.65;
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
     for (let x = -h; x < w + h; x += 18) {
       ctx.save();
       ctx.translate(x, 0);

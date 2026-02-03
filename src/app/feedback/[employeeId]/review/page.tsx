@@ -393,8 +393,12 @@ export default function ReviewPage() {
     );
   }
 
+  const rootBgClass = step === 'details'
+    ? 'min-h-screen bg-gradient-to-b from-white via-white to-violet-50'
+    : 'min-h-screen bg-white';
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className={rootBgClass}>
       <div className="max-w-md mx-auto min-h-screen flex flex-col">
         <div className="px-6 pt-10 pb-6">
           {(step === 'details' || step === 'otp') && (

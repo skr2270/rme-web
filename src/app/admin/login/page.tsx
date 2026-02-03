@@ -25,7 +25,7 @@ export default function AdminLoginPage() {
   const otp = useMemo(() => otpDigits.join(''), [otpDigits]);
 
   const normalizedPhone = useMemo(() => {
-    const digits = (phoneNumber || '').replace(/\D/g, '').slice(0, 10);
+    const digits = (phoneNumber || '').replace(/\D/g, '').slice(-10);
     return digits ? `+91${digits}` : '';
   }, [phoneNumber]);
 
@@ -121,7 +121,7 @@ export default function AdminLoginPage() {
                 type="tel"
                 placeholder="Enter 10 digit number"
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(-10))}
                 className="w-full pl-14 pr-5 py-4 border-2 border-violet-200 rounded-2xl text-base"
                 maxLength={10}
               />

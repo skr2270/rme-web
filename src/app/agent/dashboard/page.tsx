@@ -9,6 +9,14 @@ import { DashboardShell } from '@/components/organisms/DashboardShell';
 import { graphqlRequest } from '@/lib/graphql';
 import { clearAdminToken, getAdminRole, getAdminToken } from '@/lib/adminAuth';
 
+type BarcodeDetectorInstance = {
+  detect: (source: ImageBitmapSource) => Promise<Array<{ rawValue: string }>>;
+};
+
+declare const BarcodeDetector: {
+  new (options?: { formats?: string[] }): BarcodeDetectorInstance;
+};
+
 type Category = { id: number; name: string };
 
 type UnassignedQr = { id: string; code: string };
@@ -41,6 +49,14 @@ export default function AgentDashboardPage() {
 
   const [qrCodes, setQrCodes] = useState<UnassignedQr[]>([]);
   const [selectedQr, setSelectedQr] = useState<string>('');
+  const [qrSearch, setQrSearch] = useState('');
+  const [qrLookupValue, setQrLookupValue] = useState('');
+  const [scanOpen, setScanOpen] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const scanTimerRef = useRef<number | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const [gstin, setGstin] = useState('');
   const [gstinLoading, setGstinLoading] = useState(false);
@@ -263,6 +279,148 @@ export default function AgentDashboardPage() {
     }
   };
 
+  const normalizeQrInput = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+    try {
+      const url = new URL(trimmed);
+      const match = url.pathname.match(/\/qr\/code\/([^/]+)/i);
+      if (match?.[1]) return decodeURIComponent(match[1]);
+    } catch {
+      // Not a URL, fall through
+    }
+    return trimmed;
+  };
+
+  const lookupQrCode = async (rawValue: string) => {
+    const code = normalizeQrInput(rawValue);
+    if (!code) {
+      setError('Please enter or scan a valid QR code.');
+      return;
+    }
+    setError(null);
+    setSuccessMessage(null);
+    try {
+      const data = await graphqlRequest<{
+        qrCodeLookup: {
+          code: string;
+          status: 'UNASSIGNED' | 'ASSIGNED' | 'RETIRED';
+          assignedBusinessName?: string | null;
+        };
+      }>(
+        `query QrCodeLookup($code: String!) {
+          qrCodeLookup(code: $code) {
+            code
+            status
+            assignedBusinessName
+          }
+        }`,
+        { code },
+        'QrCodeLookup',
+        { authToken: token || undefined },
+      );
+
+      const result = data.qrCodeLookup;
+      if (result.status !== 'UNASSIGNED') {
+        setError(
+          result.assignedBusinessName
+            ? `QR code already assigned to ${result.assignedBusinessName}.`
+            : 'QR code is already assigned or retired.',
+        );
+        return;
+      }
+      setSelectedQr(result.code);
+      setQrLookupValue(result.code);
+      setSuccessMessage('QR code is unassigned and ready to be assigned.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to lookup QR code');
+    }
+  };
+
+  const handleUploadQrImage = async (file?: File | null) => {
+    if (!file) return;
+    setUploadError(null);
+    setError(null);
+    setSuccessMessage(null);
+    if (typeof window === 'undefined' || !('BarcodeDetector' in window)) {
+      setUploadError('QR image scanning is not supported in this browser.');
+      return;
+    }
+    try {
+      const bitmap = await createImageBitmap(file);
+      const detector = new BarcodeDetector({ formats: ['qr_code'] });
+      const barcodes = await detector.detect(bitmap);
+      if (!barcodes.length) {
+        setUploadError('No QR code found in the image.');
+        return;
+      }
+      const value = barcodes[0].rawValue;
+      setQrLookupValue(value);
+      lookupQrCode(value);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Failed to read QR image.');
+    }
+  };
+
+  useEffect(() => {
+    const stopScanner = () => {
+      if (scanTimerRef.current) {
+        window.clearInterval(scanTimerRef.current);
+        scanTimerRef.current = null;
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+    };
+
+    if (!scanOpen) {
+      stopScanner();
+      return;
+    }
+
+    const startScanner = async () => {
+      setScanError(null);
+      if (typeof window === 'undefined') return;
+      if (!('BarcodeDetector' in window)) {
+        setScanError('QR scanning is not supported in this browser.');
+        return;
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' },
+          audio: false,
+        });
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+        }
+        const detector = new BarcodeDetector({ formats: ['qr_code'] });
+        scanTimerRef.current = window.setInterval(async () => {
+          if (!videoRef.current) return;
+          try {
+            const barcodes = await detector.detect(videoRef.current);
+            if (barcodes.length > 0) {
+              const value = barcodes[0].rawValue;
+              stopScanner();
+              setScanOpen(false);
+              setQrLookupValue(value);
+              lookupQrCode(value);
+            }
+          } catch {
+            // Ignore frame errors
+          }
+        }, 300);
+      } catch (err) {
+        setScanError(err instanceof Error ? err.message : 'Unable to access camera.');
+      }
+    };
+
+    startScanner();
+    return () => stopScanner();
+  }, [scanOpen, token]);
+
   const setOtpAt = (idx: number, value: string) => {
     const raw = (value || '').replace(/\D/g, '');
     if (raw.length > 1) {
@@ -281,6 +439,18 @@ export default function AgentDashboardPage() {
     });
     if (digit && idx < 3) otpRefs[idx + 1].current?.focus();
   };
+
+  const filteredQrCodes = useMemo(() => {
+    const query = qrSearch.trim().toLowerCase();
+    if (!query) return qrCodes;
+    return qrCodes.filter((qr) => qr.code.toLowerCase().includes(query));
+  }, [qrCodes, qrSearch]);
+
+  const mobileActiveStep = useMemo(() => {
+    if (!gstinData?.business_id) return 'gstin';
+    if (!displayName || !category || !phoneNumber || !businessEmail) return 'details';
+    return 'otp';
+  }, [gstinData?.business_id, displayName, category, phoneNumber, businessEmail]);
 
   if (!authChecked || !token) {
     return <div className="min-h-screen bg-slate-50" />;
@@ -305,6 +475,7 @@ export default function AgentDashboardPage() {
   );
 
   return (
+    <>
     <DashboardShell
       title="Agent Dashboard"
       subtitle="Assign QR codes to onboard businesses."
@@ -337,118 +508,310 @@ export default function AgentDashboardPage() {
     >
       <section className="space-y-6">
         <div className="rounded-3xl bg-white border border-gray-200 p-6">
-          <div className="text-lg font-bold text-gray-900">Step 1: Select Unassigned QR</div>
-          <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
-            <select
-              value={selectedQr}
-              onChange={(e) => setSelectedQr(e.target.value)}
-              className="w-full sm:w-2/3 px-4 py-3 rounded-2xl border border-violet-200 bg-white"
-            >
-              {qrCodes.map((qr) => (
-                <option key={qr.id} value={qr.code}>
-                  {qr.code}
-                </option>
-              ))}
-            </select>
-            <Button onClick={fetchUnassigned} className="bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-2xl">Refresh</Button>
-          </div>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl bg-white border border-gray-200 p-6">
-            <div className="text-lg font-bold text-gray-900">Step 2: Verify GSTIN</div>
-            <div className="mt-4 space-y-4">
-              <Input
-                type="text"
-                placeholder="GSTIN"
-                value={gstin}
-                onChange={(e) => setGstin(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-violet-100 rounded-2xl"
-              />
-              <Button
-                onClick={verifyGstin}
-                disabled={!gstin.trim() || gstinLoading}
-                className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
-              >
-                {gstinLoading ? 'Verifying…' : 'Verify GSTIN'}
-              </Button>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="text-xl font-bold text-gray-900">Assign QR Codes</div>
+              <div className="text-sm text-gray-500">Scan or lookup a QR to check assignment status before proceeding.</div>
             </div>
+            <Button onClick={fetchUnassigned} className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl">
+              Refresh
+            </Button>
           </div>
 
-          <div className="rounded-3xl bg-white border border-gray-200 p-6">
-            <div className="text-lg font-bold text-gray-900">Step 3: Business Details</div>
-            <div className="mt-4 space-y-4">
+          <div className="mt-6 grid gap-4 lg:grid-cols-[1.2fr_1fr]">
+            <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 space-y-4">
+              <div className="text-sm font-semibold text-gray-600">Lookup QR</div>
               <Input
                 type="text"
-                placeholder="Display name"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-violet-100 rounded-2xl"
+                placeholder="Paste or type QR code"
+                value={qrLookupValue}
+                onChange={(e) => setQrLookupValue(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-white"
+              />
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  onClick={() => lookupQrCode(qrLookupValue)}
+                  className="bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-2xl"
+                >
+                  Check QR
+                </Button>
+                <Button
+                  onClick={() => setScanOpen(true)}
+                  className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-3 rounded-2xl"
+                >
+                  Scan QR
+                </Button>
+                <label className="bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-2xl cursor-pointer">
+                  Upload QR
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleUploadQrImage(e.target.files?.[0])}
+                  />
+                </label>
+              </div>
+              {uploadError ? <div className="text-sm text-red-600">{uploadError}</div> : null}
+            </div>
+
+            <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-semibold text-gray-600">Select Unassigned QR</div>
+                <div className="text-xs text-gray-500">
+                  {filteredQrCodes.length} of {qrCodes.length}
+                </div>
+              </div>
+              <Input
+                type="text"
+                placeholder="Search QR code"
+                value={qrSearch}
+                onChange={(e) => setQrSearch(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-white"
               />
               <select
-                value={category}
-                onChange={(e) => setCategory(Number(e.target.value))}
-                className="w-full px-4 py-3 rounded-2xl border border-violet-100 bg-white"
+                value={selectedQr}
+                onChange={(e) => setSelectedQr(e.target.value)}
+                className="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white"
               >
-                <option value="">Select category</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
+                {[
+                  ...(selectedQr && !filteredQrCodes.find((qr) => qr.code === selectedQr)
+                    ? [{ id: 'selected', code: selectedQr }]
+                    : []),
+                  ...filteredQrCodes,
+                ].map((qr) => (
+                  <option key={qr.id} value={qr.code}>
+                    {qr.code}
                   </option>
                 ))}
               </select>
-              <Input
-                type="tel"
-                placeholder="Owner phone number"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-violet-100 rounded-2xl"
-              />
-              <Input
-                type="email"
-                placeholder="Business email"
-                value={businessEmail}
-                onChange={(e) => setBusinessEmail(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-violet-100 rounded-2xl"
-              />
-              <Button
-                onClick={submitDetails}
-                disabled={detailsLoading || !gstinData?.business_id || !displayName || !category || !phoneNumber || !businessEmail}
-                className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
-              >
-                {detailsLoading ? 'Submitting…' : 'Submit Details'}
-              </Button>
             </div>
           </div>
         </div>
 
-        <div className="rounded-3xl bg-white border border-gray-200 p-6">
-          <div className="text-lg font-bold text-gray-900">Step 4: Verify OTP & Assign</div>
-          <div className="mt-4 flex items-center justify-center gap-3">
-            {[0, 1, 2, 3].map((idx) => (
-              <input
-                key={idx}
-                ref={otpRefs[idx]}
-                type="text"
-                inputMode="numeric"
-                value={otpDigits[idx]}
-                onChange={(e) => setOtpAt(idx, e.target.value)}
-                className="w-14 h-14 rounded-2xl border-2 border-violet-300 text-center text-2xl font-bold"
-                aria-label={`OTP digit ${idx + 1}`}
-              />
-            ))}
+        <div className="rounded-3xl bg-white border border-gray-200 p-6 space-y-6">
+          <div>
+            <div className="text-xl font-bold text-gray-900">Business Verification</div>
+            <div className="text-sm text-gray-500">Complete GSTIN checks, business details, and OTP verification.</div>
           </div>
-          <div className="mt-4">
-            <Button
-              onClick={verifyOtp}
-              disabled={otp.length !== 4 || otpLoading}
-              className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
-            >
-              {otpLoading ? 'Verifying…' : 'Verify OTP & Assign QR'}
-            </Button>
+
+          <div className="hidden lg:grid gap-6 lg:grid-cols-2">
+            <div className="rounded-3xl border border-gray-200 p-6">
+              <div className="text-lg font-bold text-gray-900">Step 2: Verify GSTIN</div>
+              <div className="mt-4 space-y-4">
+                <Input
+                  type="text"
+                  placeholder="GSTIN"
+                  value={gstin}
+                  onChange={(e) => setGstin(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-violet-100 rounded-2xl"
+                />
+                <Button
+                  onClick={verifyGstin}
+                  disabled={!gstin.trim() || gstinLoading}
+                  className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
+                >
+                  {gstinLoading ? 'Verifying…' : 'Verify GSTIN'}
+                </Button>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-gray-200 p-6">
+              <div className="text-lg font-bold text-gray-900">Step 3: Business Details</div>
+              <div className="mt-4 space-y-4">
+                <Input
+                  type="text"
+                  placeholder="Display name"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-violet-100 rounded-2xl"
+                />
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(Number(e.target.value))}
+                  className="w-full px-4 py-3 rounded-2xl border border-violet-100 bg-white"
+                >
+                  <option value="">Select category</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+                <Input
+                  type="tel"
+                  placeholder="Owner phone number"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-violet-100 rounded-2xl"
+                />
+                <Input
+                  type="email"
+                  placeholder="Business email"
+                  value={businessEmail}
+                  onChange={(e) => setBusinessEmail(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-violet-100 rounded-2xl"
+                />
+                <Button
+                  onClick={submitDetails}
+                  disabled={detailsLoading || !gstinData?.business_id || !displayName || !category || !phoneNumber || !businessEmail}
+                  className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
+                >
+                  {detailsLoading ? 'Submitting…' : 'Submit Details'}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="hidden lg:block rounded-3xl border border-gray-200 p-6">
+            <div className="text-lg font-bold text-gray-900">Step 4: Verify OTP & Assign</div>
+            <div className="mt-4 flex items-center justify-center gap-3">
+              {[0, 1, 2, 3].map((idx) => (
+                <input
+                  key={idx}
+                  ref={otpRefs[idx]}
+                  type="text"
+                  inputMode="numeric"
+                  value={otpDigits[idx]}
+                  onChange={(e) => setOtpAt(idx, e.target.value)}
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border-2 border-violet-300 text-center text-xl sm:text-2xl font-bold"
+                  aria-label={`OTP digit ${idx + 1}`}
+                />
+              ))}
+            </div>
+            <div className="mt-4">
+              <Button
+                onClick={verifyOtp}
+                disabled={otp.length !== 4 || otpLoading}
+                className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
+              >
+                {otpLoading ? 'Verifying…' : 'Verify OTP & Assign QR'}
+              </Button>
+            </div>
+          </div>
+
+          <div className="lg:hidden space-y-3">
+            <details className="rounded-2xl border border-gray-200 bg-white" open={mobileActiveStep === 'gstin'}>
+              <summary className="cursor-pointer list-none px-4 py-3 font-semibold text-gray-900">Step 2: Verify GSTIN</summary>
+              <div className="px-4 pb-4 space-y-4">
+                <Input
+                  type="text"
+                  placeholder="GSTIN"
+                  value={gstin}
+                  onChange={(e) => setGstin(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-violet-100 rounded-2xl"
+                />
+                <Button
+                  onClick={verifyGstin}
+                  disabled={!gstin.trim() || gstinLoading}
+                  className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
+                >
+                  {gstinLoading ? 'Verifying…' : 'Verify GSTIN'}
+                </Button>
+              </div>
+            </details>
+
+            <details className="rounded-2xl border border-gray-200 bg-white" open={mobileActiveStep === 'details'}>
+              <summary className="cursor-pointer list-none px-4 py-3 font-semibold text-gray-900">Step 3: Business Details</summary>
+              <div className="px-4 pb-4 space-y-4">
+                <Input
+                  type="text"
+                  placeholder="Display name"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-violet-100 rounded-2xl"
+                />
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(Number(e.target.value))}
+                  className="w-full px-4 py-3 rounded-2xl border border-violet-100 bg-white"
+                >
+                  <option value="">Select category</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+                <Input
+                  type="tel"
+                  placeholder="Owner phone number"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-violet-100 rounded-2xl"
+                />
+                <Input
+                  type="email"
+                  placeholder="Business email"
+                  value={businessEmail}
+                  onChange={(e) => setBusinessEmail(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-violet-100 rounded-2xl"
+                />
+                <Button
+                  onClick={submitDetails}
+                  disabled={detailsLoading || !gstinData?.business_id || !displayName || !category || !phoneNumber || !businessEmail}
+                  className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
+                >
+                  {detailsLoading ? 'Submitting…' : 'Submit Details'}
+                </Button>
+              </div>
+            </details>
+
+            <details className="rounded-2xl border border-gray-200 bg-white" open={mobileActiveStep === 'otp'}>
+              <summary className="cursor-pointer list-none px-4 py-3 font-semibold text-gray-900">Step 4: Verify OTP & Assign</summary>
+              <div className="px-4 pb-4">
+                <div className="mt-4 flex items-center justify-center gap-3">
+                  {[0, 1, 2, 3].map((idx) => (
+                    <input
+                      key={idx}
+                      ref={otpRefs[idx]}
+                      type="text"
+                      inputMode="numeric"
+                      value={otpDigits[idx]}
+                      onChange={(e) => setOtpAt(idx, e.target.value)}
+                      className="w-12 h-12 rounded-2xl border-2 border-violet-300 text-center text-xl font-bold"
+                      aria-label={`OTP digit ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+                <div className="mt-4">
+                  <Button
+                    onClick={verifyOtp}
+                    disabled={otp.length !== 4 || otpLoading}
+                    className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
+                  >
+                    {otpLoading ? 'Verifying…' : 'Verify OTP & Assign QR'}
+                  </Button>
+                </div>
+              </div>
+            </details>
           </div>
         </div>
       </section>
     </DashboardShell>
+    {scanOpen ? (
+      <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
+        <div className="w-full max-w-lg rounded-3xl bg-white p-5 shadow-2xl">
+          <div className="flex items-center justify-between">
+            <div className="text-lg font-bold text-gray-900">Scan QR Code</div>
+            <button
+              type="button"
+              onClick={() => setScanOpen(false)}
+              className="text-gray-500 hover:text-gray-700"
+              aria-label="Close scan"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="mt-4 rounded-2xl overflow-hidden bg-gray-100">
+            <video ref={videoRef} className="w-full h-64 object-cover" muted playsInline />
+          </div>
+          {scanError ? <div className="mt-3 text-sm text-red-600">{scanError}</div> : null}
+          <div className="mt-4 text-sm text-gray-500">
+            Point the camera at a QR code. You can also paste the code manually in the input.
+          </div>
+        </div>
+      </div>
+    ) : null}
+    </>
   );
 }

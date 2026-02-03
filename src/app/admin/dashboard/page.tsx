@@ -283,12 +283,12 @@ export default function AdminDashboardPage() {
         <section className="min-h-[480px] space-y-6">
           {activeSection === 'agents' && (
             <div className="rounded-3xl bg-white border border-gray-200 p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <div className="text-xl font-bold text-gray-900">Manage Agents</div>
                   <div className="text-sm text-gray-500">Create and deactivate agent logins.</div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   <Button onClick={loadAgents} className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl">
                     Refresh
                   </Button>
@@ -322,39 +322,43 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="mt-6 rounded-2xl border border-gray-100 overflow-hidden">
-                <div className="grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-gray-100 text-xs font-semibold text-gray-600">
-                  <div>Name</div>
-                  <div>Mobile</div>
-                  <div>Email</div>
-                  <div className="text-right">Action</div>
-                </div>
-                <div className="divide-y divide-gray-100">
-                  {loadingAgents ? (
-                    <div className="px-5 py-8 text-sm text-gray-600">Loading agents…</div>
-                  ) : filteredAgents.length === 0 ? (
-                    <div className="px-5 py-8 text-sm text-gray-600">No agents created yet.</div>
-                  ) : (
-                    filteredAgents.map((agent) => (
-                      <div key={agent.id} className="grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 px-5 py-4 text-sm text-gray-700">
-                        <div className="font-semibold text-gray-900 flex items-center gap-2">
-                          {agent.name || '—'}
-                          <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
-                            Active
-                          </span>
-                        </div>
-                        <div>{agent.phoneNumber}</div>
-                        <div className="truncate">{agent.email || '—'}</div>
-                        <div className="text-right">
-                          <Button
-                            onClick={() => deactivateAgent(agent.id)}
-                            className="bg-red-50 text-red-600 px-3 py-2 rounded-xl"
-                          >
-                            Deactivate
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                  )}
+                <div className="overflow-x-auto">
+                  <div className="min-w-[720px]">
+                    <div className="grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-gray-100 text-xs font-semibold text-gray-600">
+                      <div>Name</div>
+                      <div>Mobile</div>
+                      <div>Email</div>
+                      <div className="text-right">Action</div>
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                      {loadingAgents ? (
+                        <div className="px-5 py-8 text-sm text-gray-600">Loading agents…</div>
+                      ) : filteredAgents.length === 0 ? (
+                        <div className="px-5 py-8 text-sm text-gray-600">No agents created yet.</div>
+                      ) : (
+                        filteredAgents.map((agent) => (
+                          <div key={agent.id} className="grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 px-5 py-4 text-sm text-gray-700">
+                            <div className="font-semibold text-gray-900 flex items-center gap-2">
+                              {agent.name || '—'}
+                              <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                Active
+                              </span>
+                            </div>
+                            <div>{agent.phoneNumber}</div>
+                            <div className="truncate">{agent.email || '—'}</div>
+                            <div className="text-right">
+                              <Button
+                                onClick={() => deactivateAgent(agent.id)}
+                                className="bg-red-50 text-red-600 px-3 py-2 rounded-xl"
+                              >
+                                Deactivate
+                              </Button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

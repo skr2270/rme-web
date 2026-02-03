@@ -174,11 +174,11 @@ export default function RateEmployeePage() {
     const syncSizes = () => {
       const width = typeof window !== 'undefined' ? window.innerWidth : 420;
       if (width <= 380) {
-        setItemHeight(64);
-        setStarSizes({ active: 84, inactive: 68 });
+        setItemHeight(58);
+        setStarSizes({ active: 78, inactive: 62 });
       } else {
-        setItemHeight(72);
-        setStarSizes({ active: 96, inactive: 78 });
+        setItemHeight(68);
+        setStarSizes({ active: 90, inactive: 72 });
       }
     };
     syncSizes();
@@ -289,8 +289,8 @@ export default function RateEmployeePage() {
                   <div
                     ref={wheelRef}
                     onScroll={handleScroll}
-                    className="h-[240px] sm:h-[320px] overflow-y-auto snap-y snap-mandatory overscroll-contain [scroll-snap-stop:always] [scrollbar-width:none]"
-                    style={{ WebkitOverflowScrolling: 'touch' }}
+                    className="h-[210px] sm:h-[320px] overflow-y-auto snap-y snap-mandatory overscroll-contain touch-pan-y [scroll-snap-stop:always] [scrollbar-width:none]"
+                    style={{ WebkitOverflowScrolling: 'touch', scrollPaddingTop: itemHeight * 2, scrollPaddingBottom: itemHeight * 2 }}
                     aria-label="Select rating"
                   >
                     <div style={{ height: itemHeight * 2 }} />

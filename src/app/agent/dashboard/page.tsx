@@ -8,6 +8,7 @@ import { SidebarNav } from '@/components/molecules/SidebarNav';
 import { DashboardShell } from '@/components/organisms/DashboardShell';
 import { graphqlRequest } from '@/lib/graphql';
 import { clearAdminToken, getAdminRole, getAdminToken } from '@/lib/adminAuth';
+import jsQR from 'jsqr';
 
 type BarcodeDetectorInstance = {
   detect: (source: ImageBitmapSource) => Promise<Array<{ rawValue: string }>>;
@@ -55,6 +56,7 @@ export default function AgentDashboardPage() {
   const [scanError, setScanError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const scanTimerRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -342,19 +344,41 @@ export default function AgentDashboardPage() {
     setUploadError(null);
     setError(null);
     setSuccessMessage(null);
-    if (typeof window === 'undefined' || !('BarcodeDetector' in window)) {
-      setUploadError('QR image scanning is not supported in this browser.');
-      return;
-    }
     try {
       const bitmap = await createImageBitmap(file);
-      const detector = new BarcodeDetector({ formats: ['qr_code'] });
-      const barcodes = await detector.detect(bitmap);
-      if (!barcodes.length) {
+      let value: string | null = null;
+
+      if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
+        const detector = new BarcodeDetector({ formats: ['qr_code'] });
+        const barcodes = await detector.detect(bitmap);
+        if (barcodes.length) {
+          value = barcodes[0].rawValue;
+        }
+      }
+
+      if (!value) {
+        const canvas = canvasRef.current || document.createElement('canvas');
+        const maxSize = 800;
+        const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
+        canvas.width = Math.max(1, Math.floor(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.floor(bitmap.height * scale));
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          setUploadError('Unable to read the QR image.');
+          return;
+        }
+        ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const decoded = jsQR(imageData.data, imageData.width, imageData.height);
+        if (decoded?.data) {
+          value = decoded.data;
+        }
+      }
+
+      if (!value) {
         setUploadError('No QR code found in the image.');
         return;
       }
-      const value = barcodes[0].rawValue;
       setQrLookupValue(value);
       lookupQrCode(value);
     } catch (err) {
@@ -382,10 +406,6 @@ export default function AgentDashboardPage() {
     const startScanner = async () => {
       setScanError(null);
       if (typeof window === 'undefined') return;
-      if (!('BarcodeDetector' in window)) {
-        setScanError('QR scanning is not supported in this browser.');
-        return;
-      }
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment' },
@@ -396,13 +416,39 @@ export default function AgentDashboardPage() {
           videoRef.current.srcObject = stream;
           await videoRef.current.play();
         }
-        const detector = new BarcodeDetector({ formats: ['qr_code'] });
+
+        const detector = 'BarcodeDetector' in window ? new BarcodeDetector({ formats: ['qr_code'] }) : null;
+        const canvas = canvasRef.current || document.createElement('canvas');
         scanTimerRef.current = window.setInterval(async () => {
           if (!videoRef.current) return;
           try {
-            const barcodes = await detector.detect(videoRef.current);
-            if (barcodes.length > 0) {
-              const value = barcodes[0].rawValue;
+            let value: string | null = null;
+            if (detector) {
+              const barcodes = await detector.detect(videoRef.current);
+              if (barcodes.length > 0) {
+                value = barcodes[0].rawValue;
+              }
+            } else {
+              const width = videoRef.current.videoWidth;
+              const height = videoRef.current.videoHeight;
+              if (width && height) {
+                const maxSize = 800;
+                const scale = Math.min(1, maxSize / Math.max(width, height));
+                canvas.width = Math.max(1, Math.floor(width * scale));
+                canvas.height = Math.max(1, Math.floor(height * scale));
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                  ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+                  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                  const decoded = jsQR(imageData.data, imageData.width, imageData.height);
+                  if (decoded?.data) {
+                    value = decoded.data;
+                  }
+                }
+              }
+            }
+
+            if (value) {
               stopScanner();
               setScanOpen(false);
               setQrLookupValue(value);
@@ -804,6 +850,7 @@ export default function AgentDashboardPage() {
           </div>
           <div className="mt-4 rounded-2xl overflow-hidden bg-gray-100">
             <video ref={videoRef} className="w-full h-64 object-cover" muted playsInline />
+            <canvas ref={canvasRef} className="hidden" />
           </div>
           {scanError ? <div className="mt-3 text-sm text-red-600">{scanError}</div> : null}
           <div className="mt-4 text-sm text-gray-500">

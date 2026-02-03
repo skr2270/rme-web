@@ -284,8 +284,6 @@ export default function RateEmployeePage() {
 
               <div className="mt-8">
                 <div className="relative">
-                  <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[82px] rounded-3xl bg-violet-50 border border-violet-200 pointer-events-none" />
-
                   <div
                     ref={wheelRef}
                     onScroll={handleScroll}

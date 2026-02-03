@@ -52,6 +52,9 @@ export default function AgentDashboardPage() {
   const [selectedQr, setSelectedQr] = useState<string>('');
   const [qrSearch, setQrSearch] = useState('');
   const [qrLookupValue, setQrLookupValue] = useState('');
+  const [qrMethod, setQrMethod] = useState<'manual' | 'scan' | 'upload'>('manual');
+  const [qrStatus, setQrStatus] = useState<'idle' | 'unassigned' | 'assigned' | 'error'>('idle');
+  const [showFallback, setShowFallback] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -149,6 +152,7 @@ export default function AgentDashboardPage() {
     setGstinLoading(true);
     setError(null);
     setSuccessMessage(null);
+    setQrStatus('idle');
     try {
       const data = await graphqlRequest<{ verifyGstin: GstinResponse }>(
         `mutation VerifyGstin($input: VerifyGstinInput!) {
@@ -329,13 +333,16 @@ export default function AgentDashboardPage() {
             ? `QR code already assigned to ${result.assignedBusinessName}.`
             : 'QR code is already assigned or retired.',
         );
+        setQrStatus('assigned');
         return;
       }
       setSelectedQr(result.code);
       setQrLookupValue(result.code);
       setSuccessMessage('QR code is unassigned and ready to be assigned.');
+      setQrStatus('unassigned');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to lookup QR code');
+      setQrStatus('error');
     }
   };
 
@@ -566,28 +573,67 @@ export default function AgentDashboardPage() {
 
           <div className="mt-6 grid gap-4 lg:grid-cols-[1.2fr_1fr]">
             <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 space-y-4">
-              <div className="text-sm font-semibold text-gray-600">Lookup QR</div>
-              <Input
-                type="text"
-                placeholder="Paste or type QR code"
-                value={qrLookupValue}
-                onChange={(e) => setQrLookupValue(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-white"
-              />
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  onClick={() => lookupQrCode(qrLookupValue)}
-                  className="bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-2xl"
-                >
-                  Check QR
-                </Button>
-                <Button
-                  onClick={() => setScanOpen(true)}
-                  className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-3 rounded-2xl"
-                >
-                  Scan QR
-                </Button>
-                <label className="bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-2xl cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-semibold text-gray-600">Lookup QR</div>
+                {qrStatus !== 'idle' ? (
+                  <span
+                    className={
+                      qrStatus === 'unassigned'
+                        ? 'text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100'
+                        : qrStatus === 'assigned'
+                          ? 'text-xs px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100'
+                          : 'text-xs px-2 py-1 rounded-full bg-red-50 text-red-600 border border-red-100'
+                    }
+                  >
+                    {qrStatus === 'unassigned' ? 'Unassigned' : qrStatus === 'assigned' ? 'Assigned' : 'Error'}
+                  </span>
+                ) : null}
+              </div>
+
+              <div className="flex gap-2 rounded-2xl bg-white p-1 border border-gray-200">
+                {[
+                  { key: 'manual', label: 'Manual' },
+                  { key: 'scan', label: 'Scan' },
+                  { key: 'upload', label: 'Upload' },
+                ].map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => {
+                      setQrMethod(item.key as 'manual' | 'scan' | 'upload');
+                      if (item.key === 'scan') setScanOpen(true);
+                    }}
+                    className={
+                      qrMethod === item.key
+                        ? 'flex-1 px-3 py-2 text-xs font-semibold rounded-xl bg-violet-600 text-white'
+                        : 'flex-1 px-3 py-2 text-xs font-semibold rounded-xl text-gray-600'
+                    }
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              {(qrMethod === 'manual' || !qrMethod) && (
+                <>
+                  <Input
+                    type="text"
+                    placeholder="Paste or type QR code"
+                    value={qrLookupValue}
+                    onChange={(e) => setQrLookupValue(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-white"
+                  />
+                  <Button
+                    onClick={() => lookupQrCode(qrLookupValue)}
+                    className="bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-2xl"
+                  >
+                    Check QR
+                  </Button>
+                </>
+              )}
+
+              {(qrMethod === 'upload' || !qrMethod) && (
+                <label className="bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-2xl cursor-pointer inline-flex items-center justify-center">
                   Upload QR
                   <input
                     type="file"
@@ -596,40 +642,57 @@ export default function AgentDashboardPage() {
                     onChange={(e) => handleUploadQrImage(e.target.files?.[0])}
                   />
                 </label>
-              </div>
+              )}
+
               {uploadError ? <div className="text-sm text-red-600">{uploadError}</div> : null}
             </div>
 
             <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 space-y-4">
               <div className="flex items-center justify-between">
-                <div className="text-sm font-semibold text-gray-600">Select Unassigned QR</div>
-                <div className="text-xs text-gray-500">
-                  {filteredQrCodes.length} of {qrCodes.length}
-                </div>
+                <div className="text-sm font-semibold text-gray-600">Fallback: Select Unassigned QR</div>
+                <button
+                  type="button"
+                  onClick={() => setShowFallback((prev) => !prev)}
+                  className="text-xs font-semibold text-violet-700 hover:text-violet-800"
+                >
+                  {showFallback ? 'Hide' : 'Show'}
+                </button>
               </div>
-              <Input
-                type="text"
-                placeholder="Search QR code"
-                value={qrSearch}
-                onChange={(e) => setQrSearch(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-white"
-              />
-              <select
-                value={selectedQr}
-                onChange={(e) => setSelectedQr(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white"
-              >
-                {[
-                  ...(selectedQr && !filteredQrCodes.find((qr) => qr.code === selectedQr)
-                    ? [{ id: 'selected', code: selectedQr }]
-                    : []),
-                  ...filteredQrCodes,
-                ].map((qr) => (
-                  <option key={qr.id} value={qr.code}>
-                    {qr.code}
-                  </option>
-                ))}
-              </select>
+
+              {showFallback ? (
+                <>
+                  <div className="text-xs text-gray-500">
+                    {filteredQrCodes.length} of {qrCodes.length}
+                  </div>
+                  <Input
+                    type="text"
+                    placeholder="Search QR code"
+                    value={qrSearch}
+                    onChange={(e) => setQrSearch(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-white"
+                  />
+                  <select
+                    value={selectedQr}
+                    onChange={(e) => setSelectedQr(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white"
+                  >
+                    {[
+                      ...(selectedQr && !filteredQrCodes.find((qr) => qr.code === selectedQr)
+                        ? [{ id: 'selected', code: selectedQr }]
+                        : []),
+                      ...filteredQrCodes,
+                    ].map((qr) => (
+                      <option key={qr.id} value={qr.code}>
+                        {qr.code}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              ) : (
+                <div className="text-xs text-gray-500">
+                  Use this only if you cannot scan or lookup a QR.
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -638,9 +701,14 @@ export default function AgentDashboardPage() {
           <div>
             <div className="text-xl font-bold text-gray-900">Business Verification</div>
             <div className="text-sm text-gray-500">Complete GSTIN checks, business details, and OTP verification.</div>
+            <div className="mt-3 flex items-center gap-2 text-xs text-gray-500">
+              <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600">Step {mobileActiveStep === 'gstin' ? '2' : mobileActiveStep === 'details' ? '3' : '4'} of 4</span>
+              <span className="text-gray-400">•</span>
+              <span>{mobileActiveStep === 'gstin' ? 'Verify GSTIN' : mobileActiveStep === 'details' ? 'Business Details' : 'Verify OTP'}</span>
+            </div>
           </div>
 
-          <div className="hidden lg:grid gap-6 lg:grid-cols-2">
+          <div className="hidden lg:grid gap-6">
             <div className="rounded-3xl border border-gray-200 p-6">
               <div className="text-lg font-bold text-gray-900">Step 2: Verify GSTIN</div>
               <div className="mt-4 space-y-4">
@@ -710,7 +778,7 @@ export default function AgentDashboardPage() {
 
           <div className="hidden lg:block rounded-3xl border border-gray-200 p-6">
             <div className="text-lg font-bold text-gray-900">Step 4: Verify OTP & Assign</div>
-            <div className="mt-4 flex items-center justify-center gap-3">
+            <div className="mt-6 flex items-center justify-center gap-3">
               {[0, 1, 2, 3].map((idx) => (
                 <input
                   key={idx}
@@ -724,11 +792,11 @@ export default function AgentDashboardPage() {
                 />
               ))}
             </div>
-            <div className="mt-4">
+            <div className="mt-6 flex justify-center">
               <Button
                 onClick={verifyOtp}
                 disabled={otp.length !== 4 || otpLoading}
-                className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
+                className="w-full max-w-md bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
               >
                 {otpLoading ? 'Verifying…' : 'Verify OTP & Assign QR'}
               </Button>

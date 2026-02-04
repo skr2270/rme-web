@@ -240,13 +240,70 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const buildQrLabelDataUrl = async (dataUrl: string, code: string): Promise<string> => {
+    const image = new Image();
+    image.src = dataUrl;
+    const waitForLoad = () =>
+      new Promise<void>((resolve, reject) => {
+        image.onload = () => resolve();
+        image.onerror = () => reject(new Error('Failed to load QR image.'));
+      });
+    // Prefer decode(); fall back to onload/onerror for edge cases.
+    try {
+      await image.decode();
+    } catch {
+      await waitForLoad();
+    }
+
+    const labelHeight = 6;
+    const scale = 2;
+    const qrScale = 1.2;
+    const qrWidth = Math.round(image.width * qrScale);
+    const qrHeight = Math.round(image.height * qrScale);
+    const canvas = document.createElement('canvas');
+    canvas.width = qrWidth * scale;
+    canvas.height = (qrHeight + labelHeight) * scale;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error('Unable to render QR image.');
+    }
+
+    ctx.scale(scale, scale);
+    ctx.imageSmoothingEnabled = false;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, qrWidth, qrHeight + labelHeight);
+    ctx.drawImage(image, 0, 0, qrWidth, qrHeight);
+
+    const maxFontSize = 9;
+    const minFontSize = 7;
+    const horizontalPadding = 4;
+    let fontSize = maxFontSize;
+
+    ctx.fillStyle = '#374151';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    for (; fontSize >= minFontSize; fontSize -= 1) {
+      ctx.font = `800 ${fontSize}px Inter, system-ui, -apple-system, Segoe UI, sans-serif`;
+      const textWidth = ctx.measureText(code).width;
+      if (textWidth <= qrWidth - horizontalPadding * 2) break;
+    }
+
+    ctx.font = `800 ${Math.max(fontSize, minFontSize)}px Inter, system-ui, -apple-system, Segoe UI, sans-serif`;
+    ctx.fillText(code, qrWidth / 2, qrHeight + labelHeight / 2 - 1);
+
+    return canvas.toDataURL('image/png');
+  };
+
   const downloadZip = async () => {
     if (!batch?.items?.length) return;
     const zip = new JSZip();
-    batch.items.forEach((item) => {
-      const base64 = item.dataUrl.split(',')[1] || '';
+    for (const item of batch.items) {
+      const labeledDataUrl = await buildQrLabelDataUrl(item.dataUrl, item.qrCode.code);
+      const base64 = labeledDataUrl.split(',')[1] || '';
       zip.file(`${item.qrCode.code}.png`, base64, { base64: true });
-    });
+    }
     const blob = await zip.generateAsync({ type: 'blob' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -430,7 +487,7 @@ export default function AdminDashboardPage() {
                     <div key={item.qrCode.id} className="rounded-2xl border border-gray-100 p-4">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={item.dataUrl} alt={item.qrCode.code} className="w-full" />
-                      <div className="mt-2 text-xs text-gray-700 break-all">{item.qrCode.code}</div>
+                      <div className="mt-2 text-xs text-gray-700 break-all text-center">{item.qrCode.code}</div>
                     </div>
                   ))}
                 </div>

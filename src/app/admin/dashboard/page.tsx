@@ -7,6 +7,7 @@ import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
 import { SidebarNav } from '@/components/molecules/SidebarNav';
 import { DashboardShell } from '@/components/organisms/DashboardShell';
+import { AssignQrFlow } from '@/components/organisms/AssignQrFlow';
 import { graphqlRequest } from '@/lib/graphql';
 import { clearAdminToken, getAdminRole, getAdminToken } from '@/lib/adminAuth';
 
@@ -22,7 +23,7 @@ type QrBatchItem = {
   dataUrl: string;
 };
 
-type SectionKey = 'agents' | 'qrcodes';
+type SectionKey = 'agents' | 'qrcodes' | 'assign';
 
 const IconUsers = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -50,6 +51,24 @@ const IconQr = () => (
     <path d="M19 19h1" stroke="currentColor" strokeWidth="2" />
     <path d="M19 14h1" stroke="currentColor" strokeWidth="2" />
     <path d="M14 19h1" stroke="currentColor" strokeWidth="2" />
+  </svg>
+);
+
+const IconAssign = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path
+      d="M5 7h10M5 12h10M5 17h6"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M17 16l2 2 4-4"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
@@ -276,6 +295,13 @@ export default function AdminDashboardPage() {
                 active: activeSection === 'qrcodes',
                 onClick: () => setActiveSection('qrcodes'),
               },
+              {
+                id: 'assign',
+                label: 'Assign QR Codes',
+                icon: <IconAssign />,
+                active: activeSection === 'assign',
+                onClick: () => setActiveSection('assign'),
+              },
             ]}
           />
         }
@@ -410,6 +436,9 @@ export default function AdminDashboardPage() {
                 </div>
               ) : null}
             </div>
+          )}
+          {activeSection === 'assign' && (
+            <AssignQrFlow authToken={token} />
           )}
         </section>
       </DashboardShell>

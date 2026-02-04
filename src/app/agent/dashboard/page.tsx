@@ -50,16 +50,15 @@ export default function AgentDashboardPage() {
 
   const [qrCodes, setQrCodes] = useState<UnassignedQr[]>([]);
   const [selectedQr, setSelectedQr] = useState<string>('');
-  const [qrSearch, setQrSearch] = useState('');
   const [qrLookupValue, setQrLookupValue] = useState('');
-  const [qrMethod, setQrMethod] = useState<'manual' | 'scan' | 'upload'>('manual');
+  const [qrMethod, setQrMethod] = useState<'manual' | 'select' | 'scan' | 'upload'>('manual');
   const [qrStatus, setQrStatus] = useState<'idle' | 'unassigned' | 'assigned' | 'error'>('idle');
-  const [showFallback, setShowFallback] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const manualInputRef = useRef<HTMLInputElement | null>(null);
   const scanTimerRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -142,6 +141,12 @@ export default function AgentDashboardPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  useEffect(() => {
+    if (qrMethod === 'manual') {
+      setTimeout(() => manualInputRef.current?.focus(), 40);
+    }
+  }, [qrMethod]);
 
   const handleLogout = () => {
     clearAdminToken();
@@ -493,17 +498,18 @@ export default function AgentDashboardPage() {
     if (digit && idx < 3) otpRefs[idx + 1].current?.focus();
   };
 
-  const filteredQrCodes = useMemo(() => {
-    const query = qrSearch.trim().toLowerCase();
-    if (!query) return qrCodes;
-    return qrCodes.filter((qr) => qr.code.toLowerCase().includes(query));
-  }, [qrCodes, qrSearch]);
+  const filteredQrCodes = useMemo(() => qrCodes, [qrCodes]);
 
   const mobileActiveStep = useMemo(() => {
     if (!gstinData?.business_id) return 'gstin';
     if (!displayName || !category || !phoneNumber || !businessEmail) return 'details';
     return 'otp';
   }, [gstinData?.business_id, displayName, category, phoneNumber, businessEmail]);
+
+  const isQrReady = qrStatus === 'unassigned' && !!selectedQr;
+  const canVerifyGstin = isQrReady;
+  const canSubmitDetails = !!gstinData?.business_id;
+  const canVerifyOtp = !!gstinData?.business_id && isQrReady;
 
   if (!authChecked || !token) {
     return <div className="min-h-screen bg-slate-50" />;
@@ -593,6 +599,7 @@ export default function AgentDashboardPage() {
               <div className="flex gap-2 rounded-2xl bg-white p-1 border border-gray-200">
                 {[
                   { key: 'manual', label: 'Manual' },
+                  { key: 'select', label: 'Select' },
                   { key: 'scan', label: 'Scan' },
                   { key: 'upload', label: 'Upload' },
                 ].map((item) => (
@@ -600,7 +607,7 @@ export default function AgentDashboardPage() {
                     key={item.key}
                     type="button"
                     onClick={() => {
-                      setQrMethod(item.key as 'manual' | 'scan' | 'upload');
+                      setQrMethod(item.key as 'manual' | 'select' | 'scan' | 'upload');
                       if (item.key === 'scan') setScanOpen(true);
                     }}
                     className={
@@ -621,6 +628,7 @@ export default function AgentDashboardPage() {
                     placeholder="Paste or type QR code"
                     value={qrLookupValue}
                     onChange={(e) => setQrLookupValue(e.target.value)}
+                    inputRef={manualInputRef}
                     className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-white"
                   />
                   <Button
@@ -630,6 +638,31 @@ export default function AgentDashboardPage() {
                     Check QR
                   </Button>
                 </>
+              )}
+
+              {qrMethod === 'select' && (
+                <div className="space-y-3">
+                  <div className="text-xs text-gray-500">Use when you can’t scan or paste a QR.</div>
+                  <div className="text-xs text-gray-500">
+                    {filteredQrCodes.length} unassigned QR codes available
+                  </div>
+                  <select
+                    value={selectedQr}
+                    onChange={(e) => setSelectedQr(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white"
+                  >
+                    {[
+                      ...(selectedQr && !filteredQrCodes.find((qr) => qr.code === selectedQr)
+                        ? [{ id: 'selected', code: selectedQr }]
+                        : []),
+                      ...filteredQrCodes,
+                    ].map((qr) => (
+                      <option key={qr.id} value={qr.code}>
+                        {qr.code}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               )}
 
               {(qrMethod === 'upload' || !qrMethod) && (
@@ -647,53 +680,6 @@ export default function AgentDashboardPage() {
               {uploadError ? <div className="text-sm text-red-600">{uploadError}</div> : null}
             </div>
 
-            <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-semibold text-gray-600">Fallback: Select Unassigned QR</div>
-                <button
-                  type="button"
-                  onClick={() => setShowFallback((prev) => !prev)}
-                  className="text-xs font-semibold text-violet-700 hover:text-violet-800"
-                >
-                  {showFallback ? 'Hide' : 'Show'}
-                </button>
-              </div>
-
-              {showFallback ? (
-                <>
-                  <div className="text-xs text-gray-500">
-                    {filteredQrCodes.length} of {qrCodes.length}
-                  </div>
-                  <Input
-                    type="text"
-                    placeholder="Search QR code"
-                    value={qrSearch}
-                    onChange={(e) => setQrSearch(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-white"
-                  />
-                  <select
-                    value={selectedQr}
-                    onChange={(e) => setSelectedQr(e.target.value)}
-                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white"
-                  >
-                    {[
-                      ...(selectedQr && !filteredQrCodes.find((qr) => qr.code === selectedQr)
-                        ? [{ id: 'selected', code: selectedQr }]
-                        : []),
-                      ...filteredQrCodes,
-                    ].map((qr) => (
-                      <option key={qr.id} value={qr.code}>
-                        {qr.code}
-                      </option>
-                    ))}
-                  </select>
-                </>
-              ) : (
-                <div className="text-xs text-gray-500">
-                  Use this only if you cannot scan or lookup a QR.
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
@@ -709,7 +695,7 @@ export default function AgentDashboardPage() {
           </div>
 
           <div className="hidden lg:grid gap-6">
-            <div className="rounded-3xl border border-gray-200 p-6">
+            <div className={canVerifyGstin ? "rounded-3xl border border-gray-200 p-6" : "rounded-3xl border border-gray-200 p-6 opacity-60 pointer-events-none relative"}>
               <div className="text-lg font-bold text-gray-900">Step 2: Verify GSTIN</div>
               <div className="mt-4 space-y-4">
                 <Input
@@ -721,7 +707,7 @@ export default function AgentDashboardPage() {
                 />
                 <Button
                   onClick={verifyGstin}
-                  disabled={!gstin.trim() || gstinLoading}
+                  disabled={!gstin.trim() || gstinLoading || !canVerifyGstin}
                   className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
                 >
                   {gstinLoading ? 'Verifying…' : 'Verify GSTIN'}
@@ -729,7 +715,7 @@ export default function AgentDashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-gray-200 p-6">
+            <div className={canSubmitDetails ? "rounded-3xl border border-gray-200 p-6" : "rounded-3xl border border-gray-200 p-6 opacity-60 pointer-events-none relative"}>
               <div className="text-lg font-bold text-gray-900">Step 3: Business Details</div>
               <div className="mt-4 space-y-4">
                 <Input
@@ -767,7 +753,7 @@ export default function AgentDashboardPage() {
                 />
                 <Button
                   onClick={submitDetails}
-                  disabled={detailsLoading || !gstinData?.business_id || !displayName || !category || !phoneNumber || !businessEmail}
+                  disabled={detailsLoading || !canSubmitDetails || !displayName || !category || !phoneNumber || !businessEmail}
                   className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
                 >
                   {detailsLoading ? 'Submitting…' : 'Submit Details'}
@@ -776,7 +762,7 @@ export default function AgentDashboardPage() {
             </div>
           </div>
 
-          <div className="hidden lg:block rounded-3xl border border-gray-200 p-6">
+          <div className={canVerifyOtp ? "hidden lg:block rounded-3xl border border-gray-200 p-6" : "hidden lg:block rounded-3xl border border-gray-200 p-6 opacity-60 pointer-events-none relative"}>
             <div className="text-lg font-bold text-gray-900">Step 4: Verify OTP & Assign</div>
             <div className="mt-6 flex items-center justify-center gap-3">
               {[0, 1, 2, 3].map((idx) => (
@@ -795,7 +781,7 @@ export default function AgentDashboardPage() {
             <div className="mt-6 flex justify-center">
               <Button
                 onClick={verifyOtp}
-                disabled={otp.length !== 4 || otpLoading}
+                disabled={otp.length !== 4 || otpLoading || !canVerifyOtp}
                 className="w-full max-w-md bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
               >
                 {otpLoading ? 'Verifying…' : 'Verify OTP & Assign QR'}
@@ -804,7 +790,7 @@ export default function AgentDashboardPage() {
           </div>
 
           <div className="lg:hidden space-y-3">
-            <details className="rounded-2xl border border-gray-200 bg-white" open={mobileActiveStep === 'gstin'}>
+            <details className={canVerifyGstin ? "rounded-2xl border border-gray-200 bg-white" : "rounded-2xl border border-gray-200 bg-white opacity-70 pointer-events-none"} open={mobileActiveStep === 'gstin'}>
               <summary className="cursor-pointer list-none px-4 py-3 font-semibold text-gray-900">Step 2: Verify GSTIN</summary>
               <div className="px-4 pb-4 space-y-4">
                 <Input
@@ -816,7 +802,7 @@ export default function AgentDashboardPage() {
                 />
                 <Button
                   onClick={verifyGstin}
-                  disabled={!gstin.trim() || gstinLoading}
+                  disabled={!gstin.trim() || gstinLoading || !canVerifyGstin}
                   className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
                 >
                   {gstinLoading ? 'Verifying…' : 'Verify GSTIN'}
@@ -824,7 +810,7 @@ export default function AgentDashboardPage() {
               </div>
             </details>
 
-            <details className="rounded-2xl border border-gray-200 bg-white" open={mobileActiveStep === 'details'}>
+            <details className={canSubmitDetails ? "rounded-2xl border border-gray-200 bg-white" : "rounded-2xl border border-gray-200 bg-white opacity-70 pointer-events-none"} open={mobileActiveStep === 'details'}>
               <summary className="cursor-pointer list-none px-4 py-3 font-semibold text-gray-900">Step 3: Business Details</summary>
               <div className="px-4 pb-4 space-y-4">
                 <Input
@@ -862,7 +848,7 @@ export default function AgentDashboardPage() {
                 />
                 <Button
                   onClick={submitDetails}
-                  disabled={detailsLoading || !gstinData?.business_id || !displayName || !category || !phoneNumber || !businessEmail}
+                  disabled={detailsLoading || !canSubmitDetails || !displayName || !category || !phoneNumber || !businessEmail}
                   className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
                 >
                   {detailsLoading ? 'Submitting…' : 'Submit Details'}
@@ -870,7 +856,7 @@ export default function AgentDashboardPage() {
               </div>
             </details>
 
-            <details className="rounded-2xl border border-gray-200 bg-white" open={mobileActiveStep === 'otp'}>
+            <details className={canVerifyOtp ? "rounded-2xl border border-gray-200 bg-white" : "rounded-2xl border border-gray-200 bg-white opacity-70 pointer-events-none"} open={mobileActiveStep === 'otp'}>
               <summary className="cursor-pointer list-none px-4 py-3 font-semibold text-gray-900">Step 4: Verify OTP & Assign</summary>
               <div className="px-4 pb-4">
                 <div className="mt-4 flex items-center justify-center gap-3">
@@ -890,7 +876,7 @@ export default function AgentDashboardPage() {
                 <div className="mt-4">
                   <Button
                     onClick={verifyOtp}
-                    disabled={otp.length !== 4 || otpLoading}
+                    disabled={otp.length !== 4 || otpLoading || !canVerifyOtp}
                     className="w-full bg-violet-700 hover:bg-violet-800 text-white py-3 rounded-2xl font-bold"
                   >
                     {otpLoading ? 'Verifying…' : 'Verify OTP & Assign QR'}

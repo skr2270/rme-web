@@ -36,8 +36,8 @@ function clamp(n: number, min: number, max: number) {
 function starStyle(distance: number): { scale: number; opacity: number } {
   // Active is biggest, others are smaller and fade out.
   if (distance <= 0) return { scale: 1, opacity: 1 };
-  if (distance === 1) return { scale: 0.78, opacity: 0.6 };
-  if (distance === 2) return { scale: 0.62, opacity: 0.35 };
+  if (distance === 1) return { scale: 0.7, opacity: 0.5 };
+  if (distance === 2) return { scale: 0.56, opacity: 0.3 };
   return { scale: 0.52, opacity: 0.18 };
 }
 
@@ -51,6 +51,7 @@ export default function RateEmployeePage() {
   const locationIdFromRoute = searchParams.get('location_id');
 
   const wheelRef = useRef<HTMLDivElement | null>(null);
+  const wheelContainerRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [refreshTick, setRefreshTick] = useState(0);
@@ -58,8 +59,8 @@ export default function RateEmployeePage() {
   const [businessProfile, setBusinessProfile] = useState<PublicBusinessProfile | null>(null);
   const [ratingTexts, setRatingTexts] = useState<Record<number, string>>({});
   const [rating, setRating] = useState<number>(8);
-  const [itemHeight, setItemHeight] = useState(72);
-  const [starSizes, setStarSizes] = useState({ active: 96, inactive: 78 });
+  const [itemHeight, setItemHeight] = useState(80);
+  const [starSizes, setStarSizes] = useState({ active: 112, inactive: 92 });
   const scrollTickRef = useRef<number | null>(null);
   const initialRatingRef = useRef<number>(rating);
 
@@ -172,18 +173,36 @@ export default function RateEmployeePage() {
 
   useEffect(() => {
     const syncSizes = () => {
-      const width = typeof window !== 'undefined' ? window.innerWidth : 420;
-      if (width <= 380) {
-        setItemHeight(58);
-        setStarSizes({ active: 78, inactive: 62 });
-      } else {
-        setItemHeight(68);
-        setStarSizes({ active: 90, inactive: 72 });
-      }
+      const containerWidth = wheelContainerRef.current?.getBoundingClientRect().width;
+      const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 420;
+      const width = containerWidth || viewportWidth;
+      const clamped = clamp(width, 320, 430);
+      const scale = clamped / 375;
+      const nextItemHeight = Math.round(84 * scale);
+      const nextActive = Math.round(120 * scale);
+      const nextInactive = Math.round(96 * scale);
+      setItemHeight(nextItemHeight);
+      setStarSizes({ active: nextActive, inactive: nextInactive });
     };
+
     syncSizes();
+
+    const ro = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(() => syncSizes())
+      : null;
+    if (ro && wheelContainerRef.current) {
+      ro.observe(wheelContainerRef.current);
+    }
+
+    const viewport = typeof window !== 'undefined' ? window.visualViewport : null;
+    viewport?.addEventListener('resize', syncSizes);
     window.addEventListener('resize', syncSizes);
-    return () => window.removeEventListener('resize', syncSizes);
+
+    return () => {
+      ro?.disconnect();
+      viewport?.removeEventListener('resize', syncSizes);
+      window.removeEventListener('resize', syncSizes);
+    };
   }, []);
 
   useEffect(() => {
@@ -283,12 +302,17 @@ export default function RateEmployeePage() {
               </div>
 
               <div className="mt-8">
-                <div className="relative">
+                <div ref={wheelContainerRef} className="relative">
                   <div
                     ref={wheelRef}
                     onScroll={handleScroll}
-                    className="h-[210px] sm:h-[320px] overflow-y-auto snap-y snap-mandatory overscroll-contain touch-pan-y [scroll-snap-stop:always] [scrollbar-width:none]"
-                    style={{ WebkitOverflowScrolling: 'touch', scrollPaddingTop: itemHeight * 2, scrollPaddingBottom: itemHeight * 2 }}
+                    className="overflow-y-auto snap-y snap-mandatory overscroll-contain touch-pan-y [scroll-snap-stop:always] [scrollbar-width:none]"
+                    style={{
+                      height: Math.max(itemHeight * 5 - 6, itemHeight * 4.6),
+                      WebkitOverflowScrolling: 'touch',
+                      scrollPaddingTop: itemHeight * 2,
+                      scrollPaddingBottom: itemHeight * 2,
+                    }}
                     aria-label="Select rating"
                   >
                     <div style={{ height: itemHeight * 2 }} />
@@ -296,6 +320,8 @@ export default function RateEmployeePage() {
                       const dist = Math.abs(r - rating);
                       const { scale, opacity } = starStyle(dist);
                       const size = r === rating ? starSizes.active : starSizes.inactive;
+                      const adjacentOffset = dist === 1 ? Math.round(itemHeight * 0.12) : 0;
+                      const translateY = dist === 1 ? (r < rating ? -adjacentOffset : adjacentOffset) : 0;
 
                       return (
                         <div
@@ -306,7 +332,7 @@ export default function RateEmployeePage() {
                           <div
                             className="transition-all duration-200"
                             style={{
-                              transform: `scale(${scale})`,
+                                transform: `translateY(${translateY}px) scale(${scale})`,
                               opacity,
                             }}
                           >
@@ -327,7 +353,9 @@ export default function RateEmployeePage() {
                   </div>
                 </div>
 
-                <div className="mt-3 text-center text-sm sm:text-base font-semibold text-gray-800">{ratingLine}</div>
+                <div className="mt-4 text-center text-sm sm:text-base font-semibold text-gray-800 min-h-[20px]">
+                  {ratingLine}
+                </div>
               </div>
             </>
           )}

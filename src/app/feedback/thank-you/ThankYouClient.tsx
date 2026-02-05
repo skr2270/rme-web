@@ -43,9 +43,13 @@ function ScratchCard({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isDownRef = useRef(false);
   const revealedRef = useRef(revealed);
+  const scratchCountRef = useRef(0);
 
   useEffect(() => {
     revealedRef.current = revealed;
+    if (!revealed) {
+      scratchCountRef.current = 0;
+    }
   }, [revealed]);
 
   const redraw = () => {
@@ -113,6 +117,10 @@ function ScratchCard({
 
   const maybeReveal = () => {
     if (revealedRef.current) return;
+    if (scratchCountRef.current >= 3) {
+      onReveal();
+      return;
+    }
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -135,7 +143,15 @@ function ScratchCard({
     }
 
     const ratio = total ? transparent / total : 0;
-    if (ratio >= 0.42) onReveal();
+    if (ratio >= 0.3) onReveal();
+  };
+
+  const registerScratch = () => {
+    if (revealedRef.current) return;
+    scratchCountRef.current += 1;
+    if (scratchCountRef.current >= 3) {
+      onReveal();
+    }
   };
 
   useEffect(() => {
@@ -155,6 +171,7 @@ function ScratchCard({
       (ev.target as HTMLElement | null)?.setPointerCapture?.(ev.pointerId);
       const p = getRelativePoint(ev);
       scratchAt(p.x, p.y);
+      registerScratch();
     };
 
     const onPointerMove = (ev: PointerEvent) => {
@@ -199,16 +216,6 @@ function ScratchCard({
         />
       ) : null}
 
-      {/* Accessibility / fallback reveal */}
-      {!revealed ? (
-        <button
-          type="button"
-          onClick={onReveal}
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-2xl bg-black/15 border border-black/10 text-black/80 font-semibold text-sm"
-        >
-          Reveal
-        </button>
-      ) : null}
     </div>
   );
 }
